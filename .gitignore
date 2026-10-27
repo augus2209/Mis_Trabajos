@@ -1,1 +1,2 @@
-Tienda/Servidor/
+Tienda/Servidor/.env.servers
+Tienda/Servidor/*.sqlite
