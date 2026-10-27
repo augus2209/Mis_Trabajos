@@ -1,0 +1,2190 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- título de la pestaña del navegador -->
+<title>NuevoCheckpoint</title>
+
+<!-- tipografías de Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;700&family=Unbounded:wght@700&display=swap" rel="stylesheet">
+
+<style>
+/* 1) colores y ajustes generales */
+:root{
+  --bg:#0F1024;        /* fondo de la página */
+  --surface:#1E2145;   /* fondo de tarjetas, buscador y ficha */
+  --line:#33376B;      /* color de los bordes */
+  --text:#ECEEFF;      /* texto principal */
+  --muted:#A0A5D3;     /* texto secundario */
+  --accent:#5CF2FF;    /* color de acento: foco, enlaces al pasar el ratón */
+  --lime:#C9FF6B;      /* color de descuentos y contador del carrito */
+  --brand:linear-gradient(100deg,#5CF2FF,#8B7BFF 50%,#FF6BD6); /* degradado de los botones principales */
+  --radius:14px;       /* redondeo de esquinas de tarjetas, portadas y botones */
+  --display:'Unbounded', system-ui, sans-serif;   /* fuente de títulos */
+  --body:'Hanken Grotesk', system-ui, sans-serif; /* fuente de texto */
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.55}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{width:min(1100px,100% - 32px);margin-inline:auto}  /* contenedor centrado */
+
+/* 2) cabecera */
+.top{position:sticky;top:0;z-index:10;background:rgba(15,16,36,.9);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;min-height:64px;flex-wrap:wrap;padding-block:8px}
+.logo{font-family:var(--display);font-size:1.2rem;color:var(--text);text-decoration:none}
+.search{flex:1 1 200px;max-width:420px;height:40px;padding:0 14px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--line)}
+.cart{margin-left:auto;height:40px;padding:0 14px;border-radius:var(--radius);background:none;border:1px solid var(--line);cursor:pointer}
+.cart b{background:var(--lime);color:#0F1024;border-radius:99px;padding:1px 8px;margin-left:6px}
+
+/* 3) botones y precios */
+.btn{height:44px;padding:0 20px;border-radius:var(--radius);border:1px solid var(--line);background:none;font-weight:700;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--brand);color:#0F1024;border-color:transparent}   /* botón destacado */
+.prices{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.price{font-weight:700}
+.off{background:var(--lime);color:#0F1024;font-weight:700;font-size:.85rem;padding:2px 7px;border-radius:6px}  /* etiqueta -20% */
+.was{color:var(--muted);text-decoration:line-through;font-size:.85rem}                                       /* precio tachado */
+
+/* 4) portada de cada juego, si tiene img se ve la foto y si no un degradado */
+.cover{position:relative;aspect-ratio:16/10;border-radius:var(--radius);overflow:hidden;cursor:pointer;
+  background:
+    radial-gradient(120% 90% at 15% 0%, hsl(var(--h) 90% 60% / .85), transparent 60%),
+    radial-gradient(90% 90% at 95% 100%, hsl(calc(var(--h) + 70) 90% 55% / .8), transparent 55%),
+    linear-gradient(160deg, hsl(var(--h) 55% 20%), hsl(calc(var(--h) + 40) 70% 9%))}
+.cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cover .name{position:absolute;left:14px;right:14px;bottom:12px;margin:0;font-family:var(--display);font-size:1.15rem;line-height:1.1}
+.cover.has-img .name{display:none}   /* si hay foto no se escribe el título encima */
+
+/* 5) juego destacado */
+.hero{padding:40px 0 24px}
+.hero .wrap{display:grid;grid-template-columns:1fr 1.15fr;gap:40px;align-items:center}
+.hero h2{font-family:var(--display);font-size:clamp(2rem,4.5vw,3.2rem);line-height:1.05;margin:0 0 16px}
+.hero p{color:var(--muted);margin:0 0 18px}
+.hero .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+
+/* 6) catálogo */
+.catalog{padding:24px 0 64px}
+.catalog h2{font-family:var(--display);font-size:1.4rem;margin:0 0 14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.chips button{padding:6px 14px;border-radius:99px;background:none;border:1px solid var(--line);color:var(--muted);cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--text);color:#0F1024;font-weight:700}   /* filtro activo */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}     /* columnas automáticas */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:10px}
+.card .info{padding:12px 6px 6px;display:grid;gap:8px}
+.card .title{background:none;border:0;padding:0;text-align:left;font-weight:700;font-size:1.05rem;cursor:pointer}
+.card .title:hover{color:var(--accent)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin:0;padding:0;list-style:none}
+.tags li{padding:2px 10px;border:1px solid var(--line);border-radius:99px;font-size:.8rem;color:var(--muted)}
+.empty{grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)}
+
+/* 7) ficha del juego */
+dialog{width:min(1000px,96vw);max-height:94vh;padding:22px;border:1px solid var(--line);border-radius:22px;background:var(--surface);color:var(--text)}
+dialog::backdrop{background:rgba(5,6,18,.8)}   /* fondo oscuro detrás de la ficha */
+.d-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}
+.d-head h2{font-family:var(--display);margin:0}
+.d-head p{margin:4px 0 0;color:var(--muted)}
+.d-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:24px}
+.stage{aspect-ratio:16/9;border-radius:var(--radius);overflow:hidden;background:#000;position:relative}
+.stage iframe,.stage video{position:absolute;inset:0;width:100%;height:100%;border:0}   /* tráiler */
+.stage .cover{position:absolute;inset:0;aspect-ratio:auto;border-radius:0}              /* portada si no hay tráiler */
+.d-side{display:grid;gap:12px;align-content:start}
+.d-side p{margin:0;color:var(--muted)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row .btn{flex:1 1 140px}
+
+/* aviso flotante */
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--text);color:#0F1024;padding:10px 18px;border-radius:99px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+
+footer{border-top:1px solid var(--line);padding:24px 0;color:var(--muted);font-size:.9rem}
+
+/* móvil: las columnas pasan a una sola */
+@media (max-width:800px){ .hero .wrap,.d-grid{grid-template-columns:1fr} }
+
+/* 8) vídeo de fondo, va fijo detrás de todo */
+html{background:var(--bg)}
+body{background:transparent}
+.bg-video{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-2;overflow:hidden;pointer-events:none}
+.bg-video video{position:absolute;top:0;left:0;width:100vw;height:100vh;min-width:100%;min-height:100%;object-fit:cover;display:block}
+/* el último número marca lo oscura que es la capa */
+.bg-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;background:rgba(15,16,36,.6);pointer-events:none}
+.bg-toggle{position:fixed;right:16px;bottom:16px;z-index:9;height:36px;padding:0 14px;border-radius:99px;
+  background:var(--surface);border:1px solid var(--line);cursor:pointer;font-size:.85rem}
+
+/* 9) widgets, cajas pequeñas con información extra */
+.widgets{padding:8px 0 8px}
+.widgets .wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:grid;gap:10px;align-content:start}
+.widget h3{margin:0;font-family:var(--display);font-size:.95rem}
+.widget .cover{aspect-ratio:16/8}
+.widget .count{font-family:var(--display);font-size:1.3rem;color:var(--lime)}   /* cuenta atrás */
+.widget .muted{color:var(--muted);margin:0;font-size:.9rem}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--brand)}   /* barra de valoración */
+
+/* 10) cesta, pago y pedidos */
+dialog.panel{width:min(560px,96vw)}
+.panel h2{font-family:var(--display);font-size:1.2rem;margin:0}
+.panel .head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.line{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.line small{color:var(--muted)}
+.link{background:none;border:0;color:var(--muted);cursor:pointer;text-decoration:underline;padding:0}
+.link:hover{color:var(--accent)}
+.total{display:flex;justify-content:space-between;font-weight:700;font-size:1.15rem;padding:14px 0}
+.panel .row{margin-top:8px}
+.demo{background:var(--lime);color:#0F1024;font-weight:700;font-size:.85rem;border-radius:8px;padding:6px 10px;margin-bottom:12px}
+.methods{border:0;padding:0;margin:0 0 12px;display:grid;gap:8px}
+.methods label{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius);cursor:pointer}
+.methods label:has(input:checked){border-color:var(--accent)}   /* método elegido */
+.field{display:grid;gap:4px;margin-bottom:10px}
+.field span{color:var(--muted);font-size:.85rem}
+.field input{height:40px;padding:0 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.err{color:#FF8FA3;min-height:1.3em;margin:4px 0 0}   /* mensajes de error */
+.order{border:1px solid var(--line);border-radius:var(--radius);padding:12px;margin-bottom:10px}
+.order b{font-family:var(--display);font-size:.9rem}
+.top .cart + .cart{margin-left:0}   /* "Mis pedidos" y "Carrito" quedan juntos a la derecha */
+
+.socials{display:flex;flex-wrap:wrap;gap:12px}                    /* iconos en fila; si no caben, bajan de línea */
+.social{
+  display:grid;place-items:center;                                /* centra el dibujo dentro del círculo */
+  width:48px;height:48px;border-radius:50%;                       /* círculo de 48 px */
+  border:1px solid var(--line);color:var(--text);text-decoration:none;
+  transition:transform .15s, border-color .15s, color .15s}       /* animación suave al pasar el ratón */
+.social:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-3px)}   /* al pasar: sube 3px y se pone del color de acento */
+.social svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}  /* el dibujo hereda el color del texto */
+@media (prefers-reduced-motion:reduce){ .social{transition:none} .social:hover{transform:none} }  /* sin movimiento si el sistema lo pide */
+/* 12) menú de la cabecera y enlaces-botón */
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }   /* sin desplazamiento animado si el sistema lo pide */
+section[id]{scroll-margin-top:120px}
+select,textarea{font:inherit;color:inherit}
+.nav{display:flex;gap:4px;flex-wrap:wrap}
+/* enlaces y botones del menú */
+.nav a,.nav button{padding:6px 12px;border-radius:99px;background:none;border:0;cursor:pointer;color:var(--muted);text-decoration:none;font-weight:700;font-size:.9rem}
+.nav a:hover,.nav button:hover{color:var(--accent)}
+a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:var(--text)}
+.block{padding:24px 0 40px}
+.block h2{font-family:var(--display);font-size:1.4rem;margin:0 0 6px}
+.block .sub{color:var(--muted);margin:0 0 20px}
+@media (max-width:800px){ .rev-top{grid-template-columns:1fr} }   /* en móvil, una sola columna */
+
+/* ventanas emergentes de comunidad y soporte, usan el estilo panel */
+.panel.wide{width:min(720px,96vw)}
+.stack{display:grid;gap:16px}
+.panel .intro{color:var(--muted);margin:0 0 14px}
+
+/* 13) barra de herramientas del catálogo y páginas */
+.tools{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.tools label{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.9rem}
+.tools select{height:40px;padding:0 12px;border-radius:10px;background:var(--surface);border:1px solid var(--line);color-scheme:dark}
+.count-txt{margin-left:auto;color:var(--muted);font-size:.9rem}
+.pager{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:26px}
+.pager button{min-width:40px;height:40px;padding:0 12px;border-radius:10px;background:var(--surface);border:1px solid var(--line);cursor:pointer;font-weight:700}
+.pager button:hover:not(:disabled){border-color:var(--accent)}
+.pager button[aria-current="page"]{background:var(--text);color:#0F1024}   /* página actual */
+.pager button:disabled{opacity:.4;cursor:not-allowed}                       /* "Anterior" en la página 1, etc */
+.mini-rating{margin:0;font-size:.85rem;color:var(--muted)}                  /* línea con el año y la nota de cada tarjeta */
+
+/* 14) estrellas y opiniones de la ficha del juego */
+.stars{color:#FFD24A;letter-spacing:2px;white-space:nowrap}
+.stars .dim{color:var(--line)}
+.stars-input{position:relative;display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:4px}
+.stars-input input{position:absolute;opacity:0;width:1px;height:1px}          /* el círculo del radio se oculta; se ve la estrella */
+.stars-input label{display:grid;justify-items:center;gap:2px;color:var(--line);cursor:pointer;transition:color .1s}   /* cada opción estrella + su número debajo */
+.stars-input .star{font-size:1.9rem;line-height:1}
+.stars-input .num{font-size:.85rem;color:var(--muted)}                                                          /* el número 1, 2, 3, 4 o 5 */
+.stars-input input:checked ~ label,
+.stars-input label:hover,
+.stars-input label:hover ~ label{color:#FFD24A}
+.stars-input input:focus-visible + label{outline:2px solid var(--accent);border-radius:6px}   /* accesible con teclado */
+.reviews{margin-top:26px;border-top:1px solid var(--line);padding-top:20px}
+.reviews h3{font-family:var(--display);font-size:1.05rem;margin:0 0 14px}
+.rev-top{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center;margin-bottom:18px}
+.rev-avg{text-align:center}
+.rev-avg b{display:block;font-family:var(--display);font-size:2.4rem;line-height:1;color:var(--lime)}
+.dist{display:grid;gap:4px}
+.d-row{display:grid;grid-template-columns:34px 1fr 26px;gap:8px;align-items:center;font-size:.8rem;color:var(--muted)}
+.rev-form{display:grid;gap:10px;background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:18px}
+.field textarea{padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line);resize:vertical}
+.field select{height:40px;padding:0 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line);color-scheme:dark}
+.rev{border-bottom:1px solid var(--line);padding:12px 0}
+.rev header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.rev p{margin:6px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}   /* respeta los saltos de línea del comentario */
+.rev small{color:var(--muted)}
+
+/* 15) soporte: tarjetas de contacto y preguntas frecuentes */
+.contact{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-bottom:24px}
+.contact a{color:var(--accent);font-weight:700;overflow-wrap:anywhere}
+/* botón desplegable de ayuda */
+.faq-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;background:var(--surface)}
+.chev{transition:transform .2s}
+.faq-toggle[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.faq-body{margin-top:14px}
+.faq h3{font-family:var(--display);font-size:.95rem;margin:18px 0 10px}
+.faq h3:first-child{margin-top:0}
+.faq details{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:8px;padding:0 16px}
+.faq summary{cursor:pointer;font-weight:700;padding:12px 0}
+.faq details p{margin:0 0 14px;color:var(--muted)}
+
+/* 16) correo con los códigos */
+.mail-box{background:var(--bg);border:1px dashed var(--line);border-radius:var(--radius);padding:12px;margin:12px 0}
+.mail-box code,.order code{font-family:ui-monospace,Consolas,monospace;color:var(--lime);letter-spacing:1px}
+
+/* 17) debate de la ventana comunidad */
+.deb{border:1px solid var(--line);border-radius:var(--radius);background:var(--bg);padding:0 14px;margin-bottom:8px}
+.deb summary{cursor:pointer;font-weight:700;padding:12px 0}
+.deb summary small{color:var(--muted);font-weight:400}
+.deb .msg{border-top:1px solid var(--line);padding:10px 0}
+.deb .msg p{margin:4px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}   /* respeta saltos de línea y no se sale de la caja */
+.deb .msg small{color:var(--muted)}
+.deb .reply-form,.deb .new-form{border-top:1px solid var(--line);padding:12px 0 6px}
+.deb .reply-form .field:last-of-type{margin-bottom:6px}
+
+/* 18) ventana del catálogo, con los filtros a la izquierda */
+dialog.catwin{width:min(1240px,98vw);height:94vh}
+.cat-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.cat-head h2{font-family:var(--display);font-size:1.4rem;margin:0}
+.cat-head .search{margin-left:auto}
+.cat-layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:24px;align-items:start}
+.cat-side{position:sticky;top:0;display:grid;gap:10px;max-height:calc(94vh - 120px);overflow-y:auto}   /* si los filtros no caben en pantalla, la columna tiene su propio scroll */
+.cat-side details{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);padding:0 12px}
+.cat-side summary{cursor:pointer;font-weight:700;padding:10px 0}
+.cat-side select{width:100%;height:40px;padding:0 12px;margin-bottom:10px;border-radius:10px;background:var(--surface);border:1px solid var(--line);color-scheme:dark}
+.opt-list{display:grid;gap:2px;padding-bottom:10px}
+.opt-list.scroll{max-height:220px;overflow:auto}
+.opt-list button{display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;padding:6px 10px;border-radius:8px;background:none;border:0;color:var(--muted);cursor:pointer}
+.opt-list button small{opacity:.7}
+.opt-list button:hover{color:var(--accent)}
+.opt-list button[aria-pressed="true"]{background:var(--text);color:#0F1024;font-weight:700}   /* opción activa */
+.cat-main .tools{margin-top:0}
+@media (max-width:800px){ .cat-layout{grid-template-columns:1fr} .cat-side{position:static} }   /* móvil: filtros arriba, juegos debajo */
+
+/* 19) barra horizontal de destacados */
+.dest-bar{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;transition:border-color .2s}
+.dest-bar.is-paused{border-color:var(--accent)}
+.dest-bar h2{font-family:var(--display);font-size:1.1rem;margin:0 0 4px}
+.dest-sub{margin:0 0 14px;color:var(--muted);font-size:.9rem}
+.dest-list{list-style:none;margin:0 0 16px;padding:0;display:flex;gap:8px;overflow-x:auto}
+.dest-item{flex:1 0 150px;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:12px;transition:border-color .2s}
+.dest-item.is-active{border-color:var(--accent)}
+.dest-head{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;background:none;border:0;text-align:left;cursor:pointer}
+.dest-pos{font-family:var(--display);font-size:.8rem;color:var(--muted)}
+.dest-thumb{position:relative;flex:none;width:36px;height:36px;border-radius:8px;overflow:hidden;   /* miniatura: foto o degradado del color "hue" */
+  background:radial-gradient(120% 90% at 15% 0%, hsl(var(--h) 90% 60% / .85), transparent 60%),
+             linear-gradient(160deg, hsl(var(--h) 55% 20%), hsl(calc(var(--h) + 40) 70% 9%))}
+.dest-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.dest-title{flex:1;min-width:0;font-weight:700;font-size:.85rem;line-height:1.2;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}   /* título en máximo 2 líneas */
+.dest-rate{font-size:.8rem;font-weight:700;color:var(--lime)}
+.dest-panel{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:22px;align-items:center;animation:destIn .3s ease}
+@keyframes destIn{from{opacity:.3}to{opacity:1}}   /* al cambiar de juego, el panel aparece con un suave fundido */
+.dest-stage{position:relative;aspect-ratio:16/9;border-radius:var(--radius);overflow:hidden}
+.dest-stage .cover{position:absolute;inset:0;aspect-ratio:auto;border-radius:0}   /* la portada rellena el hueco */
+.dest-trailer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border:0;background:#000;
+  pointer-events:none}   /* los clics atraviesan el vídeo y llegan a la portada */
+.dest-info{display:grid;gap:10px;align-content:center}
+.dest-info h3{font-family:var(--display);font-size:1.3rem;margin:0}
+.dest-desc{margin:0;color:var(--muted);display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}   /* máximo 5 líneas, luego "..." */
+@media (prefers-reduced-motion:reduce){ .dest-panel{animation:none} }
+@media (max-width:800px){ .dest-panel{grid-template-columns:1fr} }   /* móvil: imagen arriba, información debajo */
+</style>
+</head>
+<body>
+
+<!-- vídeo de fondo: autoplay y muted para que el navegador lo deje arrancar solo -->
+
+<!-- caja fija que ocupa toda la ventana y va detrás de todo -->
+<div class="bg-video"><video id="VIDEO_FONDO" autoplay muted loop playsinline></video></div>
+
+<!-- capa oscura semitransparente encima del vídeo para que el texto se lea bien -->
+<div class="bg-overlay"></div>
+
+<!-- cabecera -->
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#">NuevoCheckpoint</a>
+    <!-- menú: cada enlace salta a la sección cuyo id coincide con el href -->
+    <nav class="nav" aria-label="Secciones de la tienda">
+      
+      
+      <button type="button" data-win="catalogo">Catálogo</button>
+      <a href="#gratis">Gratis</a>
+      <!-- los botones con data-... abren una ventana -->
+      <button type="button" data-ayuda-ir>Ayuda</button>
+      <button type="button" data-win="comunidad">Comunidad</button>
+      <button type="button" data-win="soporte">Soporte</button>
+    </nav>
+    <!-- buscador: filtra el catálogo por título o género -->
+    <!-- el catálogo vive en su propia ventana, al pulsar Intro en este buscador se abre -->
+    <input class="search" id="q" type="search" placeholder="Buscar por título, género o año" aria-label="Buscar juegos" title="Escribe y pulsa Intro para ver los resultados en el catálogo">
+    <!-- carrito: el número lo actualiza el JS al añadir juegos -->
+    <button class="cart" id="cart" type="button">Carrito <b id="cart-n">0</b></button>
+  </div>
+</header>
+
+<main>
+  <!-- juego destacado: se rellena solo con el primer juego de la lista GAMES -->
+  <section class="hero" id="hero"></section>
+
+  <!-- barra horizontal de destacados, justo debajo del juego destacado -->
+  <section class="block wrap" id="destacados">
+    <div class="dest-bar" id="dest-bar" aria-label="Juegos destacados">
+      <h2>Top de la tienda</h2>
+      <p class="dest-sub">Los mejor valorados. Deja el ratón sobre uno y verás su tráiler.</p>
+      <ol class="dest-list" id="dest-list"></ol>
+      <div id="dest-panel"></div>
+    </div>
+  </section>
+
+  <!-- widgets, cada div widget es una cajita independiente -->
+  <section class="widgets">
+    <div class="wrap">
+      <div class="widget" id="w-oferta"></div>   <!-- oferta del día + cuenta atrás -->
+      <div class="widget" id="w-top"></div>      <!-- juego mejor valorado -->
+      <div class="widget" id="w-libre">          <!-- hueco libre para otro widget -->
+        <h3>Tu widget aquí</h3>
+        <p class="muted">Pega aquí el código que te dé cualquier servicio (Twitch, Discord, un reproductor de música, el tiempo...). Suele ser un &lt;iframe&gt; o un &lt;script&gt;.</p>
+        
+      </div>
+
+      <!-- widget de redes sociales, una cajita más -->
+      <div class="widget" id="w-redes">
+        <h3>Síguenos</h3>
+        <div class="socials">
+
+          <!-- instagram: cuadrado redondeado, círculo y puntito -->
+          <a class="social" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg>
+          </a>
+
+          <!-- youtube: rectángulo redondeado con el triángulo de play -->
+          <a class="social" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z"/></svg>
+          </a>
+
+          <!-- x: dos líneas cruzadas -->
+          <a class="social" href="https://x.com/" target="_blank" rel="noopener noreferrer" aria-label="X" title="X">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"/></svg>
+          </a>
+
+          <!-- twitch: bocadillo con dos barritas dentro -->
+          <a class="social" href="https://www.twitch.tv/" target="_blank" rel="noopener noreferrer" aria-label="Twitch" title="Twitch">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 2H3v16h5v4l4-4h5l4-4V2zM11 11V7m5 4V7"/></svg>
+          </a>
+
+          <!-- tiktok: la notita musical -->
+          <a class="social" href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer" aria-label="TikTok" title="TikTok">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5M14 3c.4 2.6 2.2 4.4 5 4.6"/></svg>
+          </a>
+
+          <!-- facebook: la letra f -->
+          <a class="social" href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          </a>
+
+        </div>
+        <p class="muted">Pulsa un icono para abrir nuestra red social.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- juegos gratis, se rellena con los juegos de GAMES que tienen price:0 -->
+  <section class="block wrap" id="gratis">
+    <h2>Juegos gratis</h2>
+    <p class="sub">Juegos completos y de gran tamaño que no cuestan nada. Pulsa "Descargar gratis" para ir a su página oficial de descarga.</p>
+    <div class="grid" id="grid-gratis"></div>
+  </section>
+
+  <!-- catálogo, se abre en su propia ventana -->
+  <section class="block wrap" id="catalogo">
+    <h2>Catálogo</h2>
+    <p class="sub">Todos nuestros juegos en una ventana aparte, con filtros por género, año, antigüedad, precio y más.</p>
+    <button class="btn primary" type="button" data-win="catalogo">Abrir el catálogo</button>
+  </section>
+
+  <!-- opiniones de la tienda, puntuar y comentar juntos -->
+  <section class="block wrap" id="opiniones">
+    <h2>Opiniones sobre la tienda</h2>
+    <p class="sub">Puntúa la tienda de 1 a 5 estrellas y cuéntanos qué tal ha ido tu experiencia.</p>
+    <div class="widget" id="tienda-opiniones"></div>
+  </section>
+
+  <!-- ayuda desplegable con las preguntas frecuentes, empieza plegada -->
+  <section class="block wrap" id="ayuda">
+    <button class="btn faq-toggle" id="faq-btn" type="button" data-ayuda-toggle aria-expanded="false" aria-controls="faq">
+      <span>Ayuda: preguntas frecuentes</span><span class="chev" aria-hidden="true">▾</span>
+    </button>
+    <div class="faq faq-body" id="faq" hidden>
+      <h3>Búsqueda de juegos</h3>
+      <details><summary>No encuentro un juego</summary>
+        <p>Escribe en el buscador el título, el género o el año (y pulsa Intro para abrir el catálogo). Si sigue sin salir, comprueba que el género esté en "Todos" y el desplegable de año en "Todos los años": un filtro activo oculta juegos. En la ventana del catálogo, pulsa "Quitar todos los filtros" para empezar de cero.</p></details>
+      <details><summary>¿Cómo veo los juegos más nuevos o más antiguos?</summary>
+        <p>En el catálogo, abre el desplegable "Ordenar por" y elige "Año: más nuevos primero" o "Año: más antiguos primero". También puedes elegir un año concreto en el desplegable "Año".</p></details>
+      <details><summary>¿Por qué solo veo 20 juegos?</summary>
+        <p>El catálogo muestra 20 juegos por página. Usa los botones numerados de debajo (2, 3, 4...) o "Siguiente" para ver el resto.</p></details>
+
+      <h3>Compra y entrega de códigos</h3>
+      <details><summary>¿Cómo compro un juego?</summary>
+        <p>Pulsa "Añadir al carrito", abre el carrito y pulsa "Pagar". Te pediremos tu correo electrónico (obligatorio) y el método de pago.</p></details>
+      <details><summary>¿Por qué es obligatorio el correo?</summary>
+        <p>Porque los códigos de tus juegos se envían por correo electrónico. Sin correo no podemos entregarte tu compra.</p></details>
+      <details><summary>No me ha llegado el correo con mi código</summary>
+        <p>Revisa la carpeta de spam o correo no deseado. Si pasado un rato sigue sin llegar, escríbenos indicando tu número de pedido (empieza por PR-).</p></details>
+      <details><summary>Me equivoqué al escribir mi correo</summary>
+        <p>Contacta con soporte lo antes posible con tu número de pedido y el correo correcto. Por eso te pedimos escribirlo dos veces al pagar.</p></details>
+
+      <h3>Formas de pago</h3>
+      <details><summary>¿Qué formas de pago aceptáis?</summary>
+        <p>Tarjeta de crédito, Bizum y PayPal.</p></details>
+      <details><summary>Mi tarjeta da error</summary>
+        <p>Revisa que el número esté completo, que la caducidad tenga el formato MM/AA (por ejemplo 08/29) y que el CVC tenga 3 o 4 cifras. Los datos de tu tarjeta no se guardan en la tienda.</p></details>
+      <details><summary>¿Cómo pago con Bizum?</summary>
+        <p>Escribe el móvil español (9 cifras, empieza por 6 o 7) asociado a tu Bizum y aprueba la solicitud en la app de tu banco.</p></details>
+    </div>
+  </section>
+</main>
+
+<!-- pie de página: cambia el texto -->
+<footer><div class="wrap">Proyecto de tienda de juegos · Curso 2026 · <button class="link" type="button" data-win="soporte" style="color:inherit">Soporte y ayuda</button></div></footer>
+
+<!-- ventana de la ficha, vacía hasta que se pulsa un juego -->
+<dialog id="detail"><div id="d-wrap"></div></dialog>
+
+<!-- ventana de la cesta, una sola ventana con 4 pantallas distintas -->
+<dialog id="shop" class="panel"><div id="shop-wrap"></div></dialog>
+
+<!-- ventana del catálogo, un dialog grande -->
+<dialog id="catalogo-win" class="catwin" aria-labelledby="cat-titulo">
+  <div class="cat-head">
+    <h2 id="cat-titulo">Catálogo</h2>
+    <!-- buscador propio de la ventana -->
+    <input class="search" id="cat-q" type="search" placeholder="Buscar por título, género o año" aria-label="Buscar en el catálogo">
+    <button class="btn" type="button" data-win-close>Cerrar</button>
+  </div>
+
+  <div class="cat-layout">
+    <aside class="cat-side" aria-label="Filtros del catálogo">
+      <details open><summary>Géneros</summary><div class="opt-list scroll" id="chips"></div></details>
+      <details open><summary>Antigüedad</summary><div class="opt-list" id="f-edad"></div></details>
+      <details open><summary>Año</summary><select id="year" aria-label="Año de lanzamiento"></select></details>
+      <details open><summary>Precio</summary><div class="opt-list" id="f-precio"></div></details>
+      <details><summary>Valoración</summary><div class="opt-list" id="f-nota"></div></details>
+      <!-- data-filtros-reset: el JS deja los filtros como al principio -->
+      <button class="btn" type="button" data-filtros-reset>Quitar todos los filtros</button>
+    </aside>
+
+    <div class="cat-main">
+      <!-- barra de herramientas: ordenar por año/precio/valoración + contador de juegos -->
+      <div class="tools">
+        <label>Ordenar por
+          <select id="sort">
+            <option value="destacados">Destacados (orden de la tienda)</option>
+            <option value="nuevos">Año: más nuevos primero</option>
+            <option value="antiguos">Año: más antiguos primero</option>
+            <option value="precio-asc">Precio: de menor a mayor</option>
+            <option value="precio-desc">Precio: de mayor a menor</option>
+            <option value="valoracion">Mejor valorados</option>
+            <option value="az">Nombre (A-Z)</option>
+          </select>
+        </label>
+        <span class="count-txt" id="count-txt" aria-live="polite"></span>   <!-- "Mostrando 1-20 de 45 juegos" -->
+      </div>
+
+      <div class="grid" id="grid"></div>
+
+      <!-- páginas, los botones los crea el JS cuando hay más de una -->
+      <nav class="pager" id="pager" aria-label="Páginas del catálogo"></nav>
+    </div>
+  </div>
+</dialog>
+
+<!-- ventana de comunidad, un dialog que se abre encima de la página -->
+<dialog id="comunidad-win" class="panel wide" aria-labelledby="comunidad-titulo">
+  <div class="head"><h2 id="comunidad-titulo">Comunidad</h2><button class="btn" type="button" data-win-close>Cerrar</button></div>
+  <!-- el enlace cierra esta ventana y baja a la sección #opiniones -->
+  <p class="intro">Debate con otros jugadores y mira lo que opinan. Para opinar sobre un juego, ábrelo desde el catálogo. Para puntuar la tienda, ve a <a class="link" href="#opiniones" data-win-close>Opiniones sobre la tienda</a>.</p>
+  <div class="stack">
+    <div class="widget" id="com-debate"></div>
+    <div class="widget" id="com-ultimas"></div>
+    <div class="widget" id="com-top"></div>
+  </div>
+</dialog>
+
+<!-- ventana de soporte y atención al cliente -->
+<dialog id="soporte-win" class="panel wide" aria-labelledby="soporte-titulo">
+  <div class="head"><h2 id="soporte-titulo">Soporte y atención al cliente</h2><button class="btn" type="button" data-win-close>Cerrar</button></div>
+  <p class="intro">¿Algo no funciona o tienes dudas? Estamos para ayudarte.</p>
+  <div class="stack">
+    <div class="contact" id="contact"></div>
+    <!-- formulario de contacto -->
+    <div class="widget" id="w-contacto-form">
+      <h3>Escríbenos</h3>
+      <label class="field"><span>Tu nombre</span><input id="s-nombre" autocomplete="name"></label>
+      <label class="field"><span>Tu correo</span><input id="s-mail" type="email" autocomplete="email"></label>
+      <label class="field"><span>Motivo</span>
+        <select id="s-tema">
+          <option>Problema con la búsqueda</option>
+          <option>Problema con una compra</option>
+          <option>Problema con el pago</option>
+          <option>No me llega mi código</option>
+          <option>Otro</option>
+        </select></label>
+      <label class="field"><span>Mensaje (indica tu nº de pedido si lo tienes)</span><textarea id="s-msg" rows="4"></textarea></label>
+      <p class="err" id="s-err" role="alert"></p>
+      <button class="btn primary" type="button" data-soporte-send>Enviar por correo</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- aviso flotante -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* 1) juegos, aquí se añaden, editan o borran. Se copia un bloque entre llaves */
+const GAMES = [
+  {id:'Elden Ring', title:'Elden Ring', dev:'FromSoftware', hue:265, img:"img/eldengring.webp" , alt:"Elden Ring", width:"150" , trailer:'video/ELDENRING.mp4',
+   tags:['Acción RPG','Mundo abierto'], price:59.99, discount:0, rating:94, release:'25 de febrero de 2022',
+   short:'El reino ha caído. La realeza está rota. Y tú eres lo único que queda entre el caos y el fin de todo.',
+   desc:'Imagina un mundo inmenso, salvaje y despiadado, donde cada montaña esconde un secreto, cada bosque esconde una muerte, y cada enemigo que enfrentas puede ser tu última lección.\n' +
+           '\n' +
+           'No hay manos que te guíen. No hay mapas que te salven. Solo tú, tu arma y una pregunta que te persigue desde el primer paso. No es un juego. Es una prueba.\n' +
+           '\n' +
+           '"No mueras. No te rindas. No mires atrás."'},
+
+  {id:'Kingdom Come: Deliverance II', title:'Kingdom Come: Deliverance II', dev:'Warhorse Studios', hue:90, img:'img/kingdom.webp', trailer:'video/kingdom.mp4',
+   tags:['RPG de acción','Mundo abierto'], price:50.99, discount:20, rating:91, release:'4 de febrero del 2025',
+   short:'Sin magia. Sin dragones. Sin fantasía. Solo acero, sangre y la Bohemia de 1403.',
+   desc:'Eres Henry de Skalitz: hijo de un herrero, huérfano de guerra y un hombre común que va a hacer cosas extraordinarias. Tu aldea fue arrasada. Tu familia, masacrada. Y ahora, desde las ruinas de una forja humilde hasta la mismísima corte del rey, cada paso que das es una cuenta pendiente. \n' +
+           '\n' +
+           'Un RPG que te deja ser quien quieras. ¿Bruto con la maza? ¿Asesino silencioso? ¿Erudito que resuelve todo con la palabra? ¿Herrero, alquimista, cazarrecompensas? Tus habilidades suben con lo que haces, no con lo que eliges en un menú. Y cada decisión tiene peso: el mundo no se reinicia.\n'  +
+           '\n' +
+              '"De la forja de un herrero a la corte de los reyes."\n'},
+
+  {id:'Resident Evil Requiem', title:'Resident Evil Requiem', dev:'Capcom', hue:79, img:'img/requiem.webp', trailer:'video/residentEvil.mp4',
+   tags:['Rol','Acción'], price:69.99, discount:0, rating:88, release:'27 de febrero del 2026',
+   short:'Todo comienza cuando aparece un cadáver en un hotel abandonado del Medio Oeste estadounidense, víctima de una enfermedad desconocida. Grace, asignada al caso, se ve obligada a regresar al mismo lugar donde su madre fue asesinada ocho años antes. Cuando un policía desaparece en el hotel, Leon recibe la orden de acudir al lugar. Sus caminos convergen y ambos deberán enfrentarse a sus pasados para desentrañar la verdad detrás del incidente de Raccoon City.',
+   desc:'El juego combina el survival horror clásico —combate, investigaciones, puzles y gestión de recursos— con la acción desenfrenada, permitiendo alternar entre primera y tercera persona. Las ubicaciones incluyen un centro de pacientes infestado de zombis y las ruinas de Raccoon City, arrasada por un misil. '},
+
+  {id:'neon', title:'Pulso Neón', dev:'Ritmo Sur', hue:320, img:'', trailer:'',
+   tags:['Ritmo','Arcade'], price:9.99, discount:35, rating:90, release:'5 jun 2026',
+   short:'Corre por una ciudad que late al ritmo de tu música.',
+   desc:'Elige una canción y tu ciudad se construye a su alrededor. Salta, desliza y esquiva siguiendo el compás.'},
+
+  {id:'hortus', title:'Hortus', dev:'Verde Vivo', hue:140, img:'', trailer:'',
+   tags:['Gestión','Relajante'], price:17.99, discount:0, rating:96, release:'11 abr 2026',
+   short:'Cuida un jardín que crece incluso cuando cierras el juego.',
+   desc:'Planta, riega y observa. Las estaciones pasan en tiempo real y cada planta tiene su propio ritmo.'},
+
+  {id:'farola', title:'La Última Farola', dev:'Luz Lenta', hue:55, img:'', trailer:'',
+   tags:['Narrativa','Terror suave'], price:0, discount:0, rating:92, release:'31 oct 2025',
+   short:'Enciende la única farola del pueblo y descubre por qué nadie sale de noche.',
+   desc:'Una historia corta para jugar en una tarde. Recorre calles vacías y decide cuánta luz quieres dar.'},
+
+  /* juegos gratis de gran tamaño, todos con price:0 salen en la sección de gratis */
+  {id:'cs2', title:'Counter-Strike 2', dev:'Valve', hue:30, img:'img/counter.webp', trailer:'video/counter.mp4', download:'https://store.steampowered.com/app/730/',
+   tags:['Disparos','Multijugador'], price:0, discount:0, rating:86, release:'27 sep 2023',
+   short:'Una bomba, dos bandos y cinco balas de diferencia entre ganar la ronda o perder la partida.',
+   desc:'El shooter táctico que ha definido el género durante más de dos décadas vuelve con un motor nuevo, humo que reacciona de verdad y una precisión que se siente en cada disparo. Cinco contra cinco: unos plantan la bomba, los otros la desactivan, y cada ronda se decide con puntería, comunicación y economía de equipo. \n' +
+      '\n' +
+      'Sin excusas, sin suerte: aquí gana quien apunta mejor. Incluye partidas competitivas y casuales, así que hay sitio tanto para el que quiere subir de rango como para el que solo quiere calentar la mano.'},
+
+  {id:'dota2', title:'Dota 2', dev:'Valve', hue:0, img:'img/dota2.webp', trailer:'video/dota2.mp4', download:'https://store.steampowered.com/app/570/',
+   tags:['MOBA','Estrategia'], price:0, discount:0, rating:82, release:'9 jul 2013',
+   short:'Dos equipos, cinco héroes cada uno y un solo objetivo: derribar el Ancestral rival antes de que derriben el tuyo.',
+   desc:'Más de cien héroes, miles de combinaciones y una curva de aprendizaje que dura años, no horas. Cada partida es una guerra de información: quién controla el mapa, quién saca ventaja en la selección de personajes y quién sabe rematar la jugada en el momento justo.\n' +
+      '\n' +
+      'Es, para muchos, el MOBA más profundo que existe, y también el corazón de una de las escenas competitivas más grandes de los esports. Se aprende para toda la vida y no se termina de dominar nunca del todo.'},
+
+  {id:'apex', title:'Apex Legends', dev:'Respawn Entertainment', hue:10, img:'img/apex.webp', trailer:'video/apex.mp4', download:'https://store.steampowered.com/app/1172470/',
+   tags:['Battle royale','Disparos'], price:0, discount:0, rating:82, release:'4 feb 2019',
+   short:'Solo tú, dos compañeros y un mapa que se va cerrando. La última leyenda en pie se lo lleva todo.',
+   desc:'Aquí no se gana solo con puntería: se gana moviéndose. Deslízate por las laderas, engancha el gancho de Wattson o teletranspórtate con Wraith mientras el equipo rival intenta cazarte. Cada leyenda tiene sus propias habilidades, así que cada escuadra de tres se juega distinto según quién la forme.\n' +
+      '\n' +
+      'El sistema de marcas (el famoso "ping") te permite avisar de una amenaza, señalar un botín o pedir ayuda sin decir una sola palabra. Rápido, brutal y siempre en movimiento.'},
+
+  {id:'warframe', title:'Warframe', dev:'Digital Extremes', hue:200, img:'img/warframe.webp', trailer:'video/warframe.mp4', download:'https://store.steampowered.com/app/230410/',
+   tags:['Acción','Cooperativo'], price:0, discount:0, rating:91, release:'25 mar 2013',
+   short:'Eres un Tenno: un ninja espacial dormido durante siglos que despierta para acabar lo que empezó.',
+   desc:'Enfúndate una exoarmadura (un "Warframe") y combina disparos veloces con combate cuerpo a cuerpo fluido mientras saltas entre plataformas y paredes como si la gravedad fuera solo una sugerencia. Puedes jugar en solitario o formar equipo con otros Tenno para misiones cada vez más exigentes.\n' +
+      '\n' +
+      'Un catálogo de misiones enorme, cientos de armas y armaduras que personalizar, y un universo que Digital Extremes no ha dejado de ampliar desde su lanzamiento. Cuanto más juegas, más se abre el mundo.'},
+
+  {id:'poe', title:'Path of Exile', dev:'Grinding Gear Games', hue:350, img:'img/exile.webp', trailer:'video/exile.mp4', download:'https://store.steampowered.com/app/238960/',
+   tags:['Acción RPG','Multijugador'], price:0, discount:0, rating:90, release:'23 oct 2013',
+   short:'Un ARPG oscuro y sin piedad, con un árbol de habilidades tan inmenso que parece una constelación entera.',
+   desc:'Naces como un exiliado desterrado a una tierra hostil, y de ahí solo hay un camino: hacerte más fuerte o morir en el intento. La profundidad de su sistema de objetos y de personalización de personaje no tiene parangón: cada gema, cada enlace y cada punto del árbol de pasivas cambia por completo cómo juegas.\n' +
+      '\n' +
+      'Se puede jugar gratis desde el primer minuto, y aun así esconde cientos de horas de contenido para quien quiera perderse en él.'},
+
+  {id:'rivals', title:'Marvel Rivals', dev:'NetEase Games', hue:280, img:'img/marvel.webp', trailer:'video/marvel.mp4', download:'https://store.steampowered.com/app/2767030/',
+   tags:['Hero shooter','Multijugador'], price:0, discount:0, rating:80, release:'6 dic 2024',
+   short:'Iron Man, Loki y Storm en el mismo equipo: seis contra seis, habilidades combinadas y escenarios que se hacen pedazos.',
+   desc:'Elige a tu héroe o villano favorito de Marvel y combina sus poderes con los de tus compañeros de equipo: hay sinergias pensadas para jugarse en pareja que cambian por completo una partida. Los escenarios son destructibles de verdad, así que el propio mapa se convierte en otra arma más.\n' +
+      '\n' +
+      'Partidas rápidas, objetivos claros y un reparto de personajes que no deja de crecer con cada temporada.'},
+
+  /* 20 juegos de los más vendidos de Steam, septiembre de 2026 */
+  {id:"wardogs", title:"WARDOGS", dev:"BULKHEAD", hue:15, appid:1867240,
+   img:'img/wardog.webp', trailer:"video/Wardogs.mp4",
+   tags:["Acción", "Táctico", "Multijugador"], price:39.99, discount:0, rating:82, release:"2026",
+   short:"Acción táctica multijugador en acceso anticipado: coordina a tu equipo antes de que lo haga el enemigo.",
+   desc:"Juego de acción táctica multijugador desarrollado por BULKHEAD y publicado por Team17. Lleva varias semanas en lo más alto de las listas de ventas de Steam.\n\nEstá en acceso anticipado: el contenido y las funciones pueden cambiar con las actualizaciones."},
+
+  {id:"fc27", title:"EA SPORTS FC 27", dev:"EA Sports", hue:140, appid:4080220,
+   img:'img/ea27.webp', trailer:"video/ea27.mp4",
+   tags:["Deportes", "Fútbol", "Multijugador"], price:69.99, discount:0, rating:60, release:"2026",
+   short:"La nueva temporada del fútbol de EA Sports, número 1 de ventas en Steam en la semana 40.",
+   desc:"Entrega anual de la saga de fútbol de EA Sports, con modos para jugar en solitario, contra amigos u online.\n\nCada temporada renueva plantillas y jugabilidad, y por eso siempre entra directa a lo más alto de las listas."},
+
+  {id:"halloween", title:"Halloween: The Game", dev:"IllFonic", hue:25, appid:3219630,
+   img:'https://cdn.cloudflare.steamstatic.com/steam/apps/3219630/header.jpg', trailer:"",
+   tags:["Terror", "Supervivencia", "Multijugador"], price:39.99, discount:0, rating:65, release:"2026",
+   short:"Terror multijugador de supervivencia ambientado en el universo de Halloween.",
+   desc:"Juego de acción y terror multijugador de IllFonic, con Gun Interactive como co-publisher.\n\nSobrevivir a la noche depende de la cooperación del equipo y de la sangre fría de cada jugador."},
+
+  {id:"dawnwalker", title:"The Blood of Dawnwalker", dev:"Rebel Wolves", hue:350, appid:3751260,
+   img:'img/blood.webp', trailer:"video/blood.mp4",
+   tags:["RPG de acción", "Fantasía oscura"], price:69.99, discount:0, rating:85, release:"2026",
+   short:"Fantasía oscura y vampiros: el RPG de acción de Rebel Wolves, el estudio de veteranos de The Witcher 3.",
+   desc:"Un RPG de acción de fantasía oscura donde el día y la noche cambian las reglas del mundo y del protagonista.\n\nEs uno de los grandes estrenos del año y sigue entre los más vendidos de Steam."},
+
+  {id:"borderlands4", title:"Borderlands 4", dev:"Gearbox Software", hue:45, appid:1285190,
+   img:'img/borderlands4.webp', trailer:"video/borderlands4.mp4",
+   tags:["Disparos", "Cooperativo", "Looter shooter"], price:69.99, discount:0, rating:65, release:"12 sep 2025",
+   short:"Más armas, más caos y un mundo nuevo por saquear: el looter shooter de Gearbox vuelve.",
+   desc:"Looter shooter en primera persona con una cantidad enorme de armas, cazadores de la cámara y jefes que te obligan a jugar en equipo.\n\nSe puede disfrutar en solitario o en cooperativo."},
+
+  {id:"controlresonant", title:"CONTROL Resonant", dev:"Remedy Entertainment", hue:0, appid:3669870,
+   img:'img/control-resonant.webp', trailer:"video/control-resonant.mp4",
+   tags:["Acción", "Sobrenatural"], price:59.99, discount:0, rating:88, release:"2026",
+   short:"La nueva entrega de la saga Control: acción sobrenatural en tercera persona.",
+   desc:"Continúa la saga Control de Remedy Entertainment, con combate de poderes y escenarios imposibles.\n\nDebutó en tercer lugar de la lista semanal de ventas de Steam."},
+
+  {id:"bodycam", title:"Bodycam", dev:"Reissad Studio", hue:210, appid:2406770,
+   img:'img/bodycam.webp', trailer:"video/bodycam.mp4",
+   tags:["Disparos", "Realista"], price:33.32, discount:0, rating:80, release:"2026",
+   short:"Shooter táctico con estética de cámara corporal: cada partida se ve como una grabación real.",
+   desc:"Un shooter en primera persona con un aspecto visual muy realista y ritmo táctico.\n\nHa vuelto a estar entre los más vendidos de septiembre."},
+
+  {id:"onimusha", title:"Onimusha: Way of the Sword", dev:"Capcom", hue:0, appid:2638890,
+   img:'img/', trailer:"",
+   tags:["Acción", "Samurái"], price:69.99, discount:0, rating:88, release:"4 sep 2026",
+   short:"Miyamoto Musashi contra los Genma en el Kioto del periodo Edo: vuelve Onimusha tras 20 años.",
+   desc:"Acción de espadas en un Kioto del periodo Edo retorcido por nubes malignas. Musashi recibe el Guantelete Oni, que le da habilidades sobrenaturales contra los demonios Genma.\n\nEs la primera entrega nueva de la saga en veinte años, y salió el 4 de septiembre de 2026 en PC y consolas."},
+
+  {id:"dragonwilds", title:"RuneScape: Dragonwilds", dev:"Jagex", hue:110, appid:1374490,
+   img:'https://cdn.cloudflare.steamstatic.com/steam/apps/1374490/header.jpg', trailer:"",
+   tags:["Supervivencia", "Cooperativo", "Rol"], price:29.99, discount:0, rating:82, release:"2025",
+   short:"Construye, fabrica y sobrevive en el mundo de RuneScape, solo o con amigos.",
+   desc:"Juego de supervivencia y construcción con el universo de RuneScape como escenario.\n\nSubió 64 puestos en la lista semanal de Steam de mediados de septiembre."},
+
+  {id:"bg3", title:"Baldur's Gate 3", dev:"Larian Studios", hue:280, appid:1086940,
+   img:'https://cdn.cloudflare.steamstatic.com/steam/apps/1086940/header.jpg', trailer:"NOWGnC3h9WQ",
+   tags:["Rol", "Fantasía", "Cooperativo"], price:59.99, discount:0, rating:97, release:"3 ago 2023",
+   short:"El RPG de Dungeons & Dragons donde cada decisión cambia la historia.",
+   desc:"Un RPG por turnos con historia ramificada y compañeros con personalidad, ambientado en el mundo de Dungeons & Dragons.\n\nPuedes jugarlo solo o en cooperativo, y casi nadie termina dos partidas iguales."},
+
+  {id:"diablo4", title:"Diablo IV", dev:"Blizzard Entertainment", hue:355, appid:2344520,
+   img:'https://cdn.cloudflare.steamstatic.com/steam/apps/2344520/header.jpg', trailer:"",
+   tags:["Acción RPG", "Multijugador"], price:49.99, discount:0, rating:75, release:"17 oct 2024",
+   short:"El infierno vuelve a abrirse: acción RPG oscura con botín constante.",
+   desc:"Acción RPG de mazmorras oscuras, jefes enormes y un botín que nunca deja de caer.\n\nHa vuelto a subir 9 puestos en las ventas de Steam."},
+
+  {id:"helldivers2", title:"HELLDIVERS 2", dev:"Arrowhead Game Studios", hue:50, appid:553850,
+   img:'https://cdn.cloudflare.steamstatic.com/steam/apps/553850/header.jpg', trailer:"0d_5JuwNn-Q",
+   tags:["Disparos", "Cooperativo"], price:39.99, discount:0, rating:85, release:"8 feb 2024",
+   short:"Democracia a tiros: shooter cooperativo contra insectos y robots.",
+   desc:"Un shooter cooperativo en tercera persona en el que cuatro jugadores defienden la galaxia.\n\nLleva más de 140 semanas en las listas de ventas de Steam."},
+
+  {id:"swzerocompany", title:"STAR WARS Zero Company", dev:"Bit Reactor", hue:220, appid:2075800,
+   img:'https://cdn.cloudflare.steamstatic.com/steam/apps/2075800/header.jpg', trailer:"",
+   tags:["Estrategia", "Ciencia ficción"], price:49.99, discount:0, rating:84, release:"2026",
+   short:"Estrategia táctica por turnos en la galaxia de Star Wars.",
+   desc:"Un juego de estrategia táctica con escuadrones y misiones en el universo de Star Wars.\n\nFue número 1 de ventas de Steam a finales de agosto."},
+
+  {id:"valheim", title:"Valheim", dev:"Iron Gate Studio", hue:30, appid:892970,
+   img:'https://cdn.cloudflare.steamstatic.com/steam/apps/892970/header.jpg', trailer:"",
+   tags:["Supervivencia", "Cooperativo", "Mundo abierto"], price:29.99, discount:0, rating:94, release:"2 feb 2021",
+   short:"Sobrevive, construye y explora un purgatorio vikingo con hasta diez amigos.",
+   desc:"Un juego de supervivencia inspirado en la mitología nórdica, con construcción, exploración y jefes.\n\nHa vuelto a entrar en el top de ventas de septiembre."},
+
+  {id:"nms", title:"No Man's Sky", dev:"Hello Games", hue:180, appid:275850,
+   img:'https://cdn.cloudflare.steamstatic.com/steam/apps/275850/header.jpg', trailer:"",
+   tags:["Exploración", "Ciencia ficción", "Mundo abierto"], price:59.99, discount:0, rating:87, release:"12 ago 2016",
+   short:"Un universo entero por explorar, con planetas casi infinitos.",
+   desc:"Explora galaxias, comercia, construye bases y pilota naves en un universo generado.\n\nHa vuelto también a las listas de ventas de septiembre de 2026."},
+
+  {id:"palworld", title:"Palworld", dev:"Pocketpair", hue:95, appid:1623730,
+   img:'https://cdn.cloudflare.steamstatic.com/steam/apps/1623730/header.jpg', trailer:"PcybNpsc3-E",
+   tags:["Supervivencia", "Mundo abierto", "Cooperativo"], price:29.99, discount:0, rating:88, release:"19 ene 2024",
+   short:"Captura criaturas, construye una base y sobrevive junto a tus Pals.",
+   desc:"Una mezcla de supervivencia, captura de criaturas y automatización en un mundo abierto.\n\nSe juega solo o en cooperativo, y sigue en el top de ventas."},
+
+  {id:"dbd", title:"Dead by Daylight", dev:"Behaviour Interactive", hue:345, appid:381210,
+   img:'https://cdn.cloudflare.steamstatic.com/steam/apps/381210/header.jpg', trailer:"",
+   tags:["Terror", "Multijugador"], price:19.99, discount:0, rating:78, release:"14 jun 2016",
+   short:"Cuatro supervivientes contra un asesino: el terror asimétrico más jugado.",
+   desc:"Un juego de terror asimétrico 4 contra 1: los supervivientes escapan y el asesino los caza.\n\nCon casi 500 semanas en las listas de ventas, es un clásico del terror online."},
+
+  {id:"tww3", title:"Total War: Warhammer III", dev:"Creative Assembly", hue:300, appid:1142710,
+   img:'https://cdn.cloudflare.steamstatic.com/steam/apps/1142710/header.jpg', trailer:"",
+   tags:["Estrategia", "Fantasía"], price:59.99, discount:0, rating:80, release:"17 feb 2022",
+   short:"Ejércitos enormes y magia caótica: estrategia total en el mundo de Warhammer.",
+   desc:"Estrategia por turnos y batallas en tiempo real con facciones de Warhammer.\n\nVolvió al top 10 semanal de Steam en la semana 40 de 2026."},
+
+  {id:"trailssky2", title:"Trails in the Sky 2nd Chapter", dev:"Nihon Falcom", hue:200, appid:4225980,
+   img:'https://cdn.cloudflare.steamstatic.com/steam/apps/4225980/header.jpg', trailer:"",
+   tags:["Rol", "JRPG"], price:59.99, discount:0, rating:96, release:"2026",
+   short:"La continuación del clásico JRPG: aventura, historia y combate por turnos.",
+   desc:"Segunda parte de la aventura de Estelle y Joshua, con combate por turnos.\n\nDebutó en la lista semanal de Steam de mediados de septiembre."},
+
+  {id:"howtofish", title:"How to Fish", dev:"Por confirmar", hue:190, appid:4001890,
+   img:'https://cdn.cloudflare.steamstatic.com/steam/apps/4001890/header.jpg', trailer:"",
+   tags:["Simulación", "Relajante"], price:7.99, discount:0, rating:90, release:"2026",
+   short:"Un juego de pesca pequeño y barato que se ha colado entre los más vendidos.",
+   desc:"Un juego de pesca con un precio muy bajo.\n\nHa estado varias semanas entre los más vendidos de Steam."}
+];
+
+/* 2) estado: variables que cambian mientras se usa la página */
+let genre = 'Todos';  // filtro de género activo
+let query = '';  // texto del buscador
+let cart = [];  // ids de los juegos añadidos al carrito
+
+/* estado del catálogo */
+const JUEGOS_POR_PAGINA = 20;  // juegos por página
+let pagina = 1;  // página que se está viendo
+let orden = 'destacados';  // criterio elegido en "Ordenar por"
+let anio = 'Todos';  // año elegido en el desplegable "Año"
+
+/* estado de los filtros de la ventana del catálogo */
+const filtro = {edad:'todos', precio:'todos', nota:'0'};
+const AÑOS_PARA_SER_NUEVO = 2;  // un juego es reciente si salió en los últimos N años
+
+const $ = s => document.querySelector(s);  // atajo para no escribir document.querySelector
+const EUR = new Intl.NumberFormat('es-ES', {style:'currency', currency:'EUR'});  // 24.99 pasa a 24,99 €
+
+/* 3) piezas reutilizables */
+
+// precio: "Gratis", precio normal, o precio con descuento
+function priceHTML(g){
+  if(g.price === 0) return '<span class="price">Gratis</span>';
+  if(!g.discount)   return `<span class="price">${EUR.format(g.price)}</span>`;
+  const final = g.price * (1 - g.discount / 100);
+  return `<span class="off">-${g.discount}%</span><span class="was">${EUR.format(g.price)}</span><span class="price">${EUR.format(final)}</span>`;
+}
+
+// portada: foto si hay "img"; si no, degradado con el color "hue" y el título encima
+function coverHTML(g){
+  return `<div class="cover ${g.img ? 'has-img' : ''}" style="--h:${g.hue}" data-open="${g.id}">
+    ${g.img ? `<img src="${g.img}" alt="Portada de ${g.title}" loading="lazy" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : ''}
+    <!-- onerror: si la imagen no carga se quita y se ve el color -->
+    <p class="name">${g.title}</p>
+  </div>`;
+}
+
+// lista de géneros como etiquetas pequeñas
+const tagsHTML = g => `<ul class="tags">${g.tags.map(t => `<li>${t}</li>`).join('')}</ul>`;
+
+/* 3b) año, orden y tarjeta */
+
+// año de un juego: busca 4 cifras seguidas en release
+const anioJuego = g => +((g.release || '').match(/\d{4}/) || [0])[0];
+
+// para ordenar por fecha necesitamos también el mes
+const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function fechaJuego(g){
+  const palabras = (g.release || '').toLowerCase().match(/[a-záéíóú]+/g) || [];
+  const mes = palabras.map(p => MESES.indexOf(p.slice(0, 3))).find(i => i >= 0);  // primer mes que aparezca
+  return anioJuego(g) * 12 + (mes ?? 0);
+}
+
+// precio con descuento sin redondear, solo sirve para comparar al ordenar
+const precioNeto = g => g.price * (1 - (g.discount || 0) / 100);
+
+// ordena según lo elegido en Ordenar por, copiando la lista para no tocar la original
+function ordenar(list){
+  const criterios = {
+    nuevos:        (a, b) => fechaJuego(b) - fechaJuego(a),  // el más reciente primero
+    antiguos:      (a, b) => fechaJuego(a) - fechaJuego(b),
+    'precio-asc':  (a, b) => precioNeto(a) - precioNeto(b),
+    'precio-desc': (a, b) => precioNeto(b) - precioNeto(a),
+    valoracion:    (a, b) => b.rating - a.rating,
+    az:            (a, b) => a.title.localeCompare(b.title, 'es')
+  };
+  const l = [...list];
+  if(criterios[orden]) l.sort(criterios[orden]);  // "destacados" no está en la lista: se deja el orden original
+  return l;
+}
+
+// tarjeta de un juego, la usan el catálogo y la sección de gratis
+function cardHTML(g, extra = ''){
+  const valoracion = typeof estrellasMini === 'function' ? ' · ' + estrellasMini(g.id) : '';
+  return `<article class="card">
+    ${coverHTML(g)}
+    <div class="info">
+      <button class="title" data-open="${g.id}">${g.title}</button>
+      ${tagsHTML(g)}
+      <p class="mini-rating">${anioJuego(g)}${valoracion}</p>
+      <div class="prices">${priceHTML(g)}</div>
+      ${extra}
+    </div>
+  </article>`;
+}
+
+/* 4) pintar la página */
+
+// franja del juego destacado
+function renderHero(i = 0){
+  const g = GAMES[i];
+  $('#hero').innerHTML = `<div class="wrap">
+    <div>
+      <h2>${g.title}</h2>
+      <p>${g.short}</p>
+      ${tagsHTML(g)}
+      <div class="actions">
+        <button class="btn primary" data-open="${g.id}">Ver detalles</button>
+        <button class="btn" data-add="${g.id}">Añadir al carrito</button>
+      </div>
+    </div>
+    ${coverHTML(g)}
+  </div>`;
+}
+
+// botones de género: "Todos" + los géneros que aparezcan en GAMES
+function renderChips(){
+  const all = ['Todos', ...new Set(GAMES.flatMap(g => g.tags))];
+  const cuantos = t => t === 'Todos' ? GAMES.length : GAMES.filter(g => g.tags.includes(t)).length;  // juegos de ese género
+  $('#chips').innerHTML = all.map(t =>
+    `<button type="button" data-genre="${t}" aria-pressed="${t === genre}"><span>${t}</span><small>${cuantos(t)}</small></button>`).join('');
+}
+
+/* filtros de antigüedad, precio y valoración */
+const añoCorte = () => new Date().getFullYear() - (AÑOS_PARA_SER_NUEVO - 1);
+const esNuevo = g => anioJuego(g) >= añoCorte();
+
+// las opciones de cada lista: valor que se guarda y texto que se ve
+const opcionesFiltro = () => ({
+  edad:   [['todos', 'Todos'], ['nuevos', `Nuevos (desde ${añoCorte()})`], ['viejos', `Antiguos (antes de ${añoCorte()})`]],
+  precio: [['todos', 'Todos'], ['gratis', 'Gratis'], ['pago', 'De pago'], ['oferta', 'En oferta']],
+  nota:   [['0', 'Cualquiera'], ['80', '80% o más'], ['90', '90% o más']]
+});
+
+// pinta los botones de cada lista
+function renderFiltros(){
+  const ops = opcionesFiltro();
+  for(const clave in ops){
+    $('#f-' + clave).innerHTML = ops[clave].map(([valor, texto]) =>
+      `<button type="button" data-filtro="${clave}" data-valor="${valor}" aria-pressed="${filtro[clave] === valor}">${texto}</button>`).join('');
+  }
+}
+
+// botón "Quitar todos los filtros": deja todo como al principio y limpia los buscadores
+function quitarFiltros(){
+  genre = 'Todos'; anio = 'Todos'; query = ''; orden = 'destacados'; pagina = 1;
+  filtro.edad = 'todos'; filtro.precio = 'todos'; filtro.nota = '0';
+  $('#q').value = ''; $('#cat-q').value = ''; $('#sort').value = 'destacados';
+  renderChips(); renderFiltros(); renderYears(); renderGrid();
+}
+
+// se llama antes de abrir la ventana del catálogo: copia el texto del buscador y repinta
+function prepararCatalogo(){
+  $('#cat-q').value = query;
+  $('#sort').value = orden;
+  renderChips(); renderFiltros(); renderYears(); renderGrid();
+}
+
+// desplegable "Año": "Todos los años" y cada año que exista en GAMES, del más reciente al más antiguo
+function renderYears(){
+  const años = [...new Set(GAMES.map(anioJuego))].sort((a, b) => b - a);
+  $('#year').innerHTML = '<option value="Todos">Todos los años</option>' +
+    años.map(y => `<option value="${y}" ${String(y) === anio ? 'selected' : ''}>${y}</option>`).join('');
+}
+
+// botones de página + contador
+function renderPager(paginas, total, ini, mostrados){
+  $('#count-txt').textContent = total ? `Mostrando ${ini + 1}–${ini + mostrados} de ${total} juegos` : '';
+  if(paginas <= 1){ $('#pager').innerHTML = ''; return; }
+  let html = `<button data-page="prev" ${pagina === 1 ? 'disabled' : ''}>← Anterior</button>`;
+  for(let n = 1; n <= paginas; n++)
+    html += `<button data-page="${n}" aria-label="Página ${n}" ${n === pagina ? 'aria-current="page"' : ''}>${n}</button>`;
+  html += `<button data-page="next" ${pagina === paginas ? 'disabled' : ''}>Siguiente →</button>`;
+  $('#pager').innerHTML = html;
+}
+
+// rejilla de tarjetas
+function renderGrid(){
+  const q = query.trim().toLowerCase();
+  let list = GAMES.filter(g =>
+    (genre === 'Todos' || g.tags.includes(genre)) &&
+    (anio === 'Todos' || String(anioJuego(g)) === anio) &&  // filtro por año
+    (filtro.edad === 'todos' || (filtro.edad === 'nuevos') === esNuevo(g)) &&  // recientes / antiguos
+    (filtro.precio === 'todos' ||  // gratis / de pago / en oferta
+       (filtro.precio === 'gratis' ? g.price === 0 : filtro.precio === 'pago' ? g.price > 0 : g.discount > 0)) &&
+    g.rating >= +filtro.nota &&  // valoración mínima, el + pasa el texto a número
+    (!q || g.title.toLowerCase().includes(q) || g.tags.some(t => t.toLowerCase().includes(q)) ||
+           String(anioJuego(g)).includes(q))  // el buscador también entiende años
+  );
+  list = ordenar(list);
+
+  // páginas: con 45 juegos y 20 por página salen 3, Math.ceil redondea hacia arriba
+  const paginas = Math.max(1, Math.ceil(list.length / JUEGOS_POR_PAGINA));
+  if(pagina > paginas) pagina = paginas;  // por si al filtrar hay menos páginas
+  const ini = (pagina - 1) * JUEGOS_POR_PAGINA;  // la página 2 empieza en el juego 20
+  const visibles = list.slice(ini, ini + JUEGOS_POR_PAGINA);  // slice corta un trozo de la lista
+
+  $('#grid').innerHTML = visibles.length ? visibles.map(g => cardHTML(g)).join('')
+    : '<p class="empty">No hay juegos con esos filtros. Prueba a pulsar "Quitar todos los filtros".</p>';
+  renderPager(paginas, list.length, ini, visibles.length);
+}
+
+/* 5) ficha del juego */
+
+/* tráiler automático: al abrir la ficha de un juego el tráiler empieza solo */
+const TRAILER_CON_SONIDO = false;
+
+// tráiler: vídeo mp4, vídeo de YouTube, o la portada si no hay
+function trailerHTML(g){
+  if(/\.(mp4|webm)$/i.test(g.trailer))
+    return `<video src="${g.trailer}" controls autoplay ${TRAILER_CON_SONIDO ? '' : 'muted'} playsinline></video>`;
+  if(g.trailer)
+    return `<iframe src="https://www.youtube-nocookie.com/embed/${g.trailer}?autoplay=1&rel=0${TRAILER_CON_SONIDO ? '' : '&mute=1'}" title="Tráiler de ${g.title}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  // juegos de Steam sin ID de tráiler: portada y un botón que abre YouTube buscando el tráiler oficial
+  if(g.appid) return coverHTML(g) + `<a class="btn primary" style="position:absolute;right:12px;bottom:12px;height:auto;padding:8px 14px;z-index:2" href="https://www.youtube.com/results?search_query=${encodeURIComponent(g.title + ' tráiler oficial')}" target="_blank" rel="noopener noreferrer">▶ Ver tráiler en YouTube</a>`;
+  return coverHTML(g);
+}
+
+// abre la ventana con los datos del juego
+function openDetail(id){
+  const g = GAMES.find(x => x.id === id);
+  $('#d-wrap').innerHTML = `
+    <div class="d-head">
+      <div><h2>${g.title}</h2><p>${g.dev}</p></div>
+      <button class="btn" data-close>Cerrar</button>
+    </div>
+    <div class="d-grid">
+      <div>
+        <div class="stage">${trailerHTML(g)}</div>
+        <h3>Acerca de este juego</h3>
+        <p style="color:var(--muted)">${g.desc}</p>
+      </div>
+      <aside class="d-side">
+        <p>${g.short}</p>
+        ${tagsHTML(g)}
+        <p>${g.rating}% de reseñas positivas · ${g.release}</p>
+        <div class="prices">${priceHTML(g)}</div>
+        <div class="row">
+          ${g.price === 0 && g.download ? `<a class="btn primary" href="${g.download}" target="_blank" rel="noopener noreferrer">Descargar gratis</a>` : ''}
+          <button class="btn ${g.price === 0 && g.download ? '' : 'primary'}" data-add="${g.id}">Añadir al carrito</button>
+        </div>
+      </aside>
+    </div>
+    <!-- aquí el script de la comunidad escribe las estrellas y los comentarios de este juego -->
+    <section class="reviews" id="resenas" aria-label="Opiniones de la comunidad"></section>`;
+  $('#detail').showModal();
+  // refuerzo del autoplay, se manda play al video a mano
+  const vid = $('#d-wrap video');
+  if(vid) vid.play().catch(() => { vid.muted = true; vid.play().catch(() => {}); });
+  if(typeof pintarResenas === 'function') pintarResenas(g.id);  // pinta las opiniones
+}
+
+/* 6) aviso flotante */
+let toastTimer;
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);  // 2000 ms, 2 segundos
+}
+
+/* 7) clics y buscador, un solo oyente para toda la página que mira qué atributo data-* tiene el elemento pulsado */
+document.addEventListener('click', e => {
+  const add = e.target.closest('[data-add]');
+  if(add){  // botón "Añadir al carrito"
+    const g = GAMES.find(x => x.id === add.dataset.add);
+    if(!cart.includes(g.id)) cart.push(g.id);
+    $('#cart-n').textContent = cart.length;
+    toast(g.title + ' añadido');
+    return;
+  }
+  if(e.target.closest('[data-close]')){ $('#detail').close(); return; }  // botón "Cerrar"
+  const open = e.target.closest('[data-open]');
+  if(open){ openDetail(open.dataset.open); return; }  // clic en portada o título
+  // clic en un botón de página
+  const pg = e.target.closest('[data-page]');
+  if(pg && !pg.disabled){
+    const v = pg.dataset.page;
+    pagina = v === 'prev' ? pagina - 1 : v === 'next' ? pagina + 1 : +v;
+    renderGrid();
+    $('#cat-titulo').scrollIntoView();
+    return;
+  }
+  const gn = e.target.closest('[data-genre]');
+  if(gn){ genre = gn.dataset.genre; pagina = 1; renderChips(); renderGrid(); return; }  // al cambiar de género volvemos a la página 1
+
+  // clic en una opción de Antigüedad / Precio / Valoración
+  const ft = e.target.closest('[data-filtro]');
+  if(ft){ filtro[ft.dataset.filtro] = ft.dataset.valor; pagina = 1; renderFiltros(); renderGrid(); return; }
+  // botón "Quitar todos los filtros"
+  if(e.target.closest('[data-filtros-reset]')){ quitarFiltros(); return; }
+});
+
+$('#q').addEventListener('input', e => { query = e.target.value; pagina = 1; renderGrid(); });  // escribir en el buscador, vuelve a la página 1
+// desplegables de la barra de herramientas
+$('#sort').addEventListener('change', e => { orden = e.target.value; pagina = 1; renderGrid(); });
+$('#year').addEventListener('change', e => { anio = e.target.value; pagina = 1; renderGrid(); });
+// buscador de la ventana del catálogo
+$('#cat-q').addEventListener('input', e => { query = e.target.value; $('#q').value = query; pagina = 1; renderGrid(); });
+// buscador de la cabecera: al pulsar Intro se abre la ventana del catálogo con los resultados
+$('#q').addEventListener('keydown', e => { if(e.key === 'Enter') abrirVentana('catalogo'); });
+
+$('#detail').addEventListener('close', () => { $('#d-wrap').innerHTML = ''; });  // al cerrar la ficha se para el vídeo
+
+/* arranque: pinta todo al cargar */
+renderHero(); renderChips(); renderFiltros(); renderYears(); renderGrid();
+</script>
+
+<!-- segundo script -->
+<script>
+/* A) ajustes */
+const VIDEOS_FONDO = [
+  'video/VIDEO_FONDO.mp4',
+  // aqui añado mas videos, uno por linea y separados por comas
+];
+const CAMBIO_FONDO = 'orden';  // 'orden' uno detras de otro, 'azar' aleatorio
+const MODO_DEMO   = true;  // true: pagos simulados, no cobra nada
+const CLAVE_CARRITO = 'prisma_carrito';  // nombre con el que se guarda la cesta en el navegador
+const CLAVE_PEDIDOS = 'prisma_pedidos';  // nombre con el que se guarda el historial de pedidos
+const CLAVE_EMAIL   = 'prisma_email';  // último correo usado, para no escribirlo cada vez
+
+/* B) vídeo de fondo */
+(function iniciarFondo(){
+  const v = $('#VIDEO_FONDO');
+  const quitarFondo = () => {
+    document.querySelector('.bg-video')?.remove();
+    document.querySelector('.bg-overlay')?.remove();
+    $('#bg-toggle')?.remove();
+  };
+  if(!VIDEOS_FONDO.length){ quitarFondo(); return; }
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) v.autoplay = false;
+
+  let n = 0;
+  v.loop = VIDEOS_FONDO.length === 1;  // con un solo video se repite, con varios pasa al siguiente
+  const poner = i => { n = i; v.src = VIDEOS_FONDO[n]; if(v.autoplay) v.play().catch(() => {}); };
+  const siguiente = () => poner(CAMBIO_FONDO === 'azar'
+    ? Math.floor(Math.random() * VIDEOS_FONDO.length)
+    : (n + 1) % VIDEOS_FONDO.length);
+
+  v.addEventListener('ended', siguiente);
+  let fallos = 0;
+  v.addEventListener('error', () => {  // si un archivo no existe, salta al siguiente
+    if(++fallos >= VIDEOS_FONDO.length) quitarFondo(); else siguiente();
+  });
+  poner(CAMBIO_FONDO === 'azar' ? Math.floor(Math.random() * VIDEOS_FONDO.length) : 0);
+
+  document.body.insertAdjacentHTML('beforeend',
+    '<button class="bg-toggle" id="bg-toggle" type="button">Pausar fondo</button>');
+  $('#bg-toggle').addEventListener('click', () => {
+    if(v.paused){ v.play(); $('#bg-toggle').textContent = 'Pausar fondo'; }
+    else        { v.pause(); $('#bg-toggle').textContent = 'Reanudar fondo'; }
+  });
+})();
+
+/* C) widgets */
+
+// precio final de un juego con su descuento aplicado, redondeado a céntimos
+const precioFinal = g => Math.round(g.price * (1 - (g.discount || 0) / 100) * 100) / 100;
+
+// cuenta atrás hasta medianoche, se llama cada segundo
+function tickOferta(){
+  const ahora = new Date();
+  const fin = new Date(ahora); fin.setHours(24, 0, 0, 0);  // las 00:00 de mañana
+  const s = Math.max(0, Math.floor((fin - ahora) / 1000));  // segundos que faltan
+  const dos = n => String(n).padStart(2, '0');  // 5 pasa a "05"
+  const el = $('#w-count');
+  if(el) el.textContent = `${dos(Math.floor(s/3600))}:${dos(Math.floor(s%3600/60))}:${dos(s%60)}`;
+}
+
+function renderWidgets(){
+  // widget 1: oferta del día, cada día toca un juego distinto de los que tienen descuento
+  const ofertas = GAMES.filter(g => g.discount > 0 && g.price > 0);
+  if(ofertas.length){
+    const g = ofertas[Math.floor(Date.now() / 86400000) % ofertas.length];  // 86400000 ms son 1 día
+    $('#w-oferta').innerHTML = `<h3>Oferta del día</h3>
+      ${coverHTML(g)}
+      <div class="prices">${priceHTML(g)}</div>
+      <p class="muted">Termina en <span class="count" id="w-count"></span></p>
+      <button class="btn primary" data-add="${g.id}">Añadir al carrito</button>`;
+    tickOferta(); setInterval(tickOferta, 1000);
+  } else {
+    $('#w-oferta').innerHTML = '<h3>Oferta del día</h3><p class="muted">Hoy no hay ofertas.</p>';
+  }
+
+  // widget 2: mejor valorado, el juego con más % de reseñas positivas
+  const top = GAMES.filter(g => g.price > 0).sort((a, b) => b.rating - a.rating)[0];
+  $('#w-top').innerHTML = `<h3>El mejor valorado</h3>
+    ${coverHTML(top)}
+    <div class="bar"><i style="width:${top.rating}%"></i></div>
+    <p class="muted">${top.title} · ${top.rating}% de reseñas positivas</p>
+    <button class="btn" data-open="${top.id}">Ver detalles</button>`;
+}
+renderWidgets();
+
+/* D) cesta guardada, localStorage es una libreta del navegador y lo que se apunta ahí sigue ahí */
+function leer(clave, porDefecto){
+  try { const v = JSON.parse(localStorage.getItem(clave)); return v ?? porDefecto; }
+  catch(e){ return porDefecto; }  // si algo falla, usamos el valor por defecto
+}
+function guardar(clave, valor){
+  try { localStorage.setItem(clave, JSON.stringify(valor)); } catch(e){}
+}
+
+// esc desactiva el HTML de un texto escrito por el usuario
+const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// al abrir la página se recupera la cesta guardada, sin los juegos que ya no existen
+cart = leer(CLAVE_CARRITO, []).filter(id => GAMES.some(g => g.id === id));
+$('#cart-n').textContent = cart.length;
+
+// cada vez que se pulsa "Añadir al carrito", guardamos la cesta
+document.addEventListener('click', e => {
+  if(e.target.closest('[data-add]')) guardar(CLAVE_CARRITO, cart);
+});
+
+/* E) ventana de la cesta, 4 pantallas: cesta, pago, hecho y pedidos */
+const juego = id => GAMES.find(g => g.id === id);
+const totalCesta = () => Math.round(cart.reduce((s, id) => s + precioFinal(juego(id)), 0) * 100) / 100;
+const precioTxt = n => n === 0 ? 'Gratis' : EUR.format(n);
+const NOMBRE_METODO = {tarjeta:'Tarjeta de crédito', bizum:'Bizum', paypal:'PayPal'};
+const cabecera = t => `<div class="head"><h2>${t}</h2><button class="btn" data-shop-close>Cerrar</button></div>`;
+
+// pantalla 1: la cesta
+function htmlCesta(){
+  if(!cart.length) return `${cabecera('Tu cesta')}
+    <p style="color:var(--muted)">Tu cesta está vacía. Añade juegos desde el catálogo.</p>
+    <div class="row"><button class="btn" data-shop-close>Seguir comprando</button>
+    <button class="btn" data-shop-view="pedidos">Mis pedidos</button></div>`;
+  return `${cabecera('Tu cesta')}
+    ${cart.map(id => { const g = juego(id); return `
+      <div class="line">
+        <div>${g.title}<br><small>${g.dev}</small></div>
+        <div>${precioTxt(precioFinal(g))} · <button class="link" data-shop-remove="${g.id}">Quitar</button></div>
+      </div>`; }).join('')}
+    <div class="total"><span>Total</span><span>${precioTxt(totalCesta())}</span></div>
+    <div class="row">
+      <button class="btn" data-shop-view="pedidos">Mis pedidos</button>
+      <button class="btn primary" data-shop-view="pago">Pagar</button>
+    </div>
+    <p style="text-align:center;margin:12px 0 0"><button class="link" data-shop-empty>Vaciar cesta</button></p>`;
+}
+
+// pantalla 2: el pago
+function htmlPago(){
+  const gratis = totalCesta() === 0;  // si todo es gratis no hace falta método de pago
+  return `${cabecera('Pago')}
+    ${MODO_DEMO ? '<div class="demo">MODO DEMO: no se cobra nada. No escribas datos reales. Para probar, tarjeta 4242 4242 4242 4242, cualquier fecha futura y CVC 123.</div>' : ''}
+    <div class="total"><span>Total a pagar</span><span>${precioTxt(totalCesta())}</span></div>
+
+    <!-- correo obligatorio, los códigos se entregan por correo así que sin él no se puede pagar -->
+    <p style="color:var(--muted);margin:0 0 8px">Te enviaremos los códigos de tus juegos por correo electrónico. Es obligatorio.</p>
+    <label class="field"><span>Correo electrónico</span><input id="e-mail" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com" value="${esc(leer(CLAVE_EMAIL, ''))}"></label>
+    <label class="field"><span>Repite el correo</span><input id="e-mail2" type="email" autocomplete="off" value="${esc(leer(CLAVE_EMAIL, ''))}"></label>
+    ${gratis ? '<p style="color:var(--muted)">No hay nada que cobrar, solo confirma el pedido.</p>' : `
+    <fieldset class="methods">
+      <legend style="color:var(--muted);font-size:.85rem;padding:0 0 6px">Método de pago</legend>
+      <label><input type="radio" name="pago" value="tarjeta" checked> Tarjeta de crédito</label>
+      <label><input type="radio" name="pago" value="bizum"> Bizum</label>
+      <label><input type="radio" name="pago" value="paypal"> PayPal</label>
+    </fieldset>
+
+    <!-- cada método tiene su propia cajita; solo se ve la del método elegido -->
+    <div id="pay-tarjeta">
+      <label class="field"><span>Nombre en la tarjeta</span><input id="c-nombre" autocomplete="off"></label>
+      <label class="field"><span>Número de tarjeta</span><input id="c-num" inputmode="numeric" placeholder="1234 5678 9012 3456" autocomplete="off"></label>
+      <div class="two">
+        <label class="field"><span>Caducidad (MM/AA)</span><input id="c-exp" placeholder="08/29" autocomplete="off"></label>
+        <label class="field"><span>CVC</span><input id="c-cvc" inputmode="numeric" maxlength="4" autocomplete="off"></label>
+      </div>
+    </div>
+    <div id="pay-bizum" hidden>
+      <label class="field"><span>Móvil asociado a Bizum</span><input id="b-tel" inputmode="numeric" maxlength="9" placeholder="600123456"></label>
+      <p style="color:var(--muted);margin:0 0 10px">Recibirás una solicitud en la app de tu banco para aprobar el pago.</p>
+    </div>
+    <div id="pay-paypal" hidden>
+      <p style="color:var(--muted);margin:0 0 10px">Al confirmar te llevaremos a PayPal para completar el pago.</p>
+    </div>`}
+    <p class="err" id="shop-err" role="alert"></p>
+    <div class="row">
+      <button class="btn" data-shop-view="cesta">Volver</button>
+      <button class="btn primary" data-shop-pay>${gratis ? 'Confirmar pedido' : 'Confirmar pago'}</button>
+    </div>`;
+}
+
+// pantalla 3: pedido confirmado
+function htmlHecho(p){
+  return `${cabecera('¡Pedido confirmado!')}
+    <p>Tu pedido <b>${p.id}</b> se ha guardado. Pagado con ${p.metodo}: <b>${precioTxt(p.total)}</b>.</p>
+    ${MODO_DEMO ? `
+      <div class="demo">MODO DEMO: no se ha enviado ningún correo real. Así sería el que recibiría el cliente:</div>
+      <div class="mail-box">
+        <small>Para: ${esc(p.email)}</small><br>
+        <b>Tus códigos del pedido ${p.id}</b>
+        ${p.juegos.map(j => `<div class="line"><span>${j.titulo}</span><code>${j.codigo}</code></div>`).join('')}
+      </div>`
+    : `<p>Hemos enviado los códigos a <b>${esc(p.email)}</b>. Si no llegan en unos minutos, mira en spam o contacta con soporte indicando tu número de pedido.</p>`}
+    <div class="row"><button class="btn" data-shop-close>Seguir comprando</button>
+    <button class="btn primary" data-shop-view="pedidos">Ver mis pedidos</button></div>`;
+}
+
+// pantalla 4: historial de pedidos
+function htmlPedidos(){
+  const lista = leer(CLAVE_PEDIDOS, []);
+  const fecha = iso => new Date(iso).toLocaleString('es-ES', {dateStyle:'medium', timeStyle:'short'});
+  return `${cabecera('Mis pedidos')}
+    ${lista.length ? lista.map(p => `
+      <div class="order">
+        <div class="line" style="border:0;padding:0"><b>${p.id}</b><small>${fecha(p.fecha)}</small></div>
+        ${p.email ? `<small style="color:var(--muted)">Enviado a ${esc(p.email)}</small>` : ''}
+        ${p.juegos.map(j => `<div class="line"><span>${j.titulo}${MODO_DEMO && j.codigo ? `<br><code>${j.codigo}</code>` : ''}</span><span>${precioTxt(j.precio)}</span></div>`).join('')}
+        <div class="total" style="padding-bottom:0"><span>${p.metodo}</span><span>${precioTxt(p.total)}</span></div>
+      </div>`).join('') : '<p style="color:var(--muted)">Todavía no has hecho ningún pedido.</p>'}
+    <div class="row"><button class="btn" data-shop-view="cesta">Volver a la cesta</button></div>
+    ${lista.length ? '<p style="text-align:center;margin:12px 0 0"><button class="link" data-shop-clear>Borrar historial</button></p>' : ''}`;
+}
+
+// escribe la pantalla pedida dentro de la ventana y la abre si estaba cerrada
+function mostrar(vista, extra){
+  const pantallas = {cesta: htmlCesta, pago: htmlPago, hecho: () => htmlHecho(extra), pedidos: htmlPedidos};
+  $('#shop-wrap').innerHTML = pantallas[vista]();
+  if(!$('#shop').open) $('#shop').showModal();
+}
+
+/* F) validar y confirmar el pago */
+
+// algoritmo de Luhn: comprueba que el número de tarjeta cuadra y detecta erratas
+function luhn(n){
+  let suma = 0, doble = false;
+  for(let i = n.length - 1; i >= 0; i--){
+    let d = +n[i];
+    if(doble){ d *= 2; if(d > 9) d -= 9; }
+    suma += d; doble = !doble;
+  }
+  return suma % 10 === 0;
+}
+
+// devuelve un texto de error, o '' si todo está bien
+function validarPago(metodo){
+  if(metodo === 'tarjeta'){
+    const num = $('#c-num').value.replace(/\s+/g, '');  // quita los espacios
+    if(!$('#c-nombre').value.trim()) return 'Escribe el nombre que aparece en la tarjeta.';
+    if(!/^\d{13,19}$/.test(num) || !luhn(num)) return 'El número de tarjeta no es válido.';
+    const ex = $('#c-exp').value.trim().match(/^(0[1-9]|1[0-2])\/(\d{2})$/);
+    if(!ex) return 'Escribe la caducidad como MM/AA, por ejemplo 08/29.';
+    if(new Date(2000 + +ex[2], +ex[1], 1) <= new Date()) return 'La tarjeta está caducada.';
+    if(!/^\d{3,4}$/.test($('#c-cvc').value.trim())) return 'El CVC son 3 o 4 números.';
+  }
+  if(metodo === 'bizum' && !/^[67]\d{8}$/.test($('#b-tel').value.trim()))
+    return 'Escribe un móvil español de 9 cifras (empieza por 6 o 7).';
+  return '';  // paypal no necesita datos aquí, los pide la propia PayPal
+}
+
+// comprueba el correo
+const EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function validarEmail(){
+  const a = $('#e-mail').value.trim(), b = $('#e-mail2').value.trim();
+  if(!EMAIL_OK.test(a)) return 'Escribe un correo electrónico válido: ahí recibirás los códigos.';
+  if(a.toLowerCase() !== b.toLowerCase()) return 'Los dos correos no coinciden. Revísalos para no perder tus códigos.';
+  return '';
+}
+
+// genera un código de ejemplo con forma XXXXX-XXXXX-XXXXX
+function generarCodigo(){
+  const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const letras = [...crypto.getRandomValues(new Uint8Array(15))].map(n => abc[n % abc.length]).join('');
+  return letras.match(/.{5}/g).join('-');
+}
+
+function confirmarPago(){
+  const gratis = totalCesta() === 0;
+  const metodo = gratis ? 'gratis' : document.querySelector('input[name=pago]:checked').value;
+  // primero se valida el correo y luego el método de pago
+  const error = validarEmail() || (gratis ? '' : validarPago(metodo));
+  if(error){ $('#shop-err').textContent = error; return; }
+  const email = $('#e-mail').value.trim();
+  guardar(CLAVE_EMAIL, email);  // se recuerda para la próxima compra
+
+  /* aquí iría el pago de verdad, ahora mismo no se cobra nada y solo se comprueban los datos */
+
+  // creamos el pedido
+  const pedido = {
+    id: 'PR-' + Date.now().toString(36).toUpperCase(),  // código único a partir de la hora
+    fecha: new Date().toISOString(),
+    metodo: gratis ? 'Sin coste' : NOMBRE_METODO[metodo],
+    total: totalCesta(),
+    email,  // correo donde se envían los códigos
+    juegos: cart.map(id => ({titulo: juego(id).title, precio: precioFinal(juego(id)), codigo: generarCodigo()}))  // un código por juego
+  };
+
+  /* aquí iría el envío del correo con los códigos, desde una página sola no se puede enviar */
+  const pedidos = leer(CLAVE_PEDIDOS, []);
+  pedidos.unshift(pedido);  // unshift añade al principio, el más reciente arriba
+  guardar(CLAVE_PEDIDOS, pedidos);
+
+  cart = []; guardar(CLAVE_CARRITO, cart);  // la cesta se vacía tras comprar
+  $('#cart-n').textContent = 0;
+  mostrar('hecho', pedido);
+}
+
+/* G) clics dentro de la ventana y botones de la cabecera */
+$('#shop').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  if('shopClose' in b.dataset) $('#shop').close();
+  else if('shopView' in b.dataset) mostrar(b.dataset.shopView);
+  else if('shopRemove' in b.dataset){  // quitar un juego
+    cart = cart.filter(id => id !== b.dataset.shopRemove);
+    guardar(CLAVE_CARRITO, cart); $('#cart-n').textContent = cart.length; mostrar('cesta');
+  }
+  else if('shopEmpty' in b.dataset){  // vaciar toda la cesta
+    cart = []; guardar(CLAVE_CARRITO, cart); $('#cart-n').textContent = 0; mostrar('cesta');
+  }
+  else if('shopPay' in b.dataset) confirmarPago();
+  else if('shopClear' in b.dataset && confirm('¿Borrar todo tu historial de pedidos?')){
+    guardar(CLAVE_PEDIDOS, []); mostrar('pedidos');
+  }
+});
+
+// al cambiar de método de pago, enseñamos solo su cajita
+$('#shop').addEventListener('change', e => {
+  if(e.target.name !== 'pago') return;
+  for(const m of ['tarjeta', 'bizum', 'paypal']) $('#pay-' + m).hidden = (m !== e.target.value);
+});
+
+// botón Carrito abre la cesta
+$('#cart').addEventListener('click', () => mostrar('cesta'));
+
+// botón Mis pedidos en la cabecera, justo antes del carrito
+$('#cart').insertAdjacentHTML('beforebegin', '<button class="cart" id="orders-btn" type="button">Mis pedidos</button>');
+$('#orders-btn').addEventListener('click', () => mostrar('pedidos'));
+</script>
+
+<!-- tercer script: comunidad, juegos gratis y soporte -->
+<script>
+/* A) ajustes de soporte, estos datos salen en las tarjetas de contacto */
+const SOPORTE_EMAIL   = 'soporte@nuevocheckpoint.example';  // correo de atención al cliente, .example es un dominio de ejemplo
+const SOPORTE_TEL_TXT = '+34 900 000 000';  // teléfono tal como se ve
+const SOPORTE_TEL_LNK = '+34900000000';  // el mismo teléfono sin espacios, lo usa el enlace tel: para llamar
+const SOPORTE_HORARIO = 'Lunes a viernes, de 9:00 a 18:00';  // horario de atención por teléfono
+const CLAVE_RESENAS   = 'prisma_resenas';  // nombre con el que se guardan las opiniones en el navegador
+const TEXTO_PUNTUAR   = 'Puntúanos';  // título que sale encima de las estrellas
+const CLAVE_OPINIONES_TIENDA = 'prisma_opiniones_tienda';  // aquí se guardan las opiniones de la tienda
+const CLAVE_DEBATE            = 'prisma_debate';  // aquí se guardan los temas del debate y sus respuestas
+
+/* B) opiniones y estrellas, cada opinión es un objeto */
+let resenas = leer(CLAVE_RESENAS, []).filter(r => GAMES.some(g => g.id === r.juego));  // ignora opiniones de juegos que ya no existen
+
+const fmt = n => n.toFixed(1).replace('.', ',');  // 4.5 pasa a 4,5
+
+// las 5 estrellas que se pulsan para puntuar
+const estrellasInputHTML = (nombre, prefijo, marcada = 0) => [5, 4, 3, 2, 1].map(e =>
+  `<input type="radio" name="${nombre}" id="${prefijo}${e}" value="${e}" ${e === marcada ? 'checked' : ''}><label for="${prefijo}${e}"><span class="star" aria-hidden="true">★</span><span class="num">${e}</span></label>`).join('');
+
+// dibuja n estrellas: las llenas en amarillo y las que faltan apagadas
+const estrellasHTML = n => `<span class="stars" role="img" aria-label="${n} de 5 estrellas">${'★'.repeat(n)}<span class="dim">${'★'.repeat(5 - n)}</span></span>`;
+
+// número de opiniones y nota media de un juego
+function resumen(id){
+  const l = resenas.filter(r => r.juego === id);
+  return {n: l.length, media: l.length ? l.reduce((s, r) => s + r.estrellas, 0) / l.length : 0};
+}
+
+// texto corto para la tarjeta del catálogo: la nota y el número de opiniones, o "Sin valoraciones"
+function estrellasMini(id){
+  const {n, media} = resumen(id);
+  return n ? `<span class="stars">★</span> ${fmt(media)} (${n})` : 'Sin valoraciones';
+}
+
+// una opinión suelta, se usa en la ficha y en la sección comunidad
+function opinionHTML(r, conJuego){
+  const fecha = new Date(r.fecha).toLocaleDateString('es-ES', {dateStyle:'medium'});
+  return `<div class="rev">
+    <header><span>${estrellasHTML(r.estrellas)} <b>${esc(r.nombre)}</b></span><small>${fecha}</small></header>
+    ${conJuego ? `<small>sobre <button class="link" data-open="${juego(r.juego).id}">${juego(r.juego).title}</button></small>` : ''}
+    <p>${esc(r.texto)}</p>
+    ${MODO_DEMO && !conJuego ? `<button class="link" data-rev-del="${r.id}">Borrar</button>` : ''}
+  </div>`;
+}
+
+// bloque de opiniones dentro de la ficha de un juego: nota media, reparto por estrellas y formulario
+function pintarResenas(id){
+  const cont = $('#resenas'); if(!cont) return;
+  const lista = resenas.filter(r => r.juego === id);
+  const {n, media} = resumen(id);
+  const reparto = [5, 4, 3, 2, 1].map(e => {  // cuántas opiniones tiene cada puntuación
+    const c = lista.filter(r => r.estrellas === e).length;
+    return `<div class="d-row"><span>${e} ★</span><div class="bar"><i style="width:${n ? c / n * 100 : 0}%"></i></div><span>${c}</span></div>`;
+  }).join('');
+
+  cont.innerHTML = `
+    <h3>Opiniones de la comunidad</h3>
+    <div class="rev-top">
+      <div class="rev-avg"><b>${n ? fmt(media) : '–'}</b>${n ? estrellasHTML(Math.round(media)) : ''}<small>${n} ${n === 1 ? 'opinión' : 'opiniones'}</small></div>
+      <div class="dist">${reparto}</div>
+    </div>
+
+    <!-- formulario -->
+    <div class="rev-form">
+      <b>${TEXTO_PUNTUAR}</b>
+      <div class="stars-input" role="radiogroup" aria-label="${TEXTO_PUNTUAR}">${estrellasInputHTML('estrella', 'est')}</div>
+      <label class="field"><span>Tu nombre</span><input id="r-nombre" maxlength="30" autocomplete="nickname"></label>
+      <label class="field"><span>Tu comentario</span><textarea id="r-texto" rows="3" maxlength="500"></textarea></label>
+      <p class="err" id="r-err" role="alert"></p>
+      <button class="btn primary" data-rev-send="${id}">Publicar opinión</button>
+    </div>
+
+    ${lista.length ? lista.map(r => opinionHTML(r, false)).join('') : '<p style="color:var(--muted)">Todavía no hay opiniones. ¡Sé el primero!</p>'}`;
+}
+
+// comprueba y guarda la opinión
+function enviarResena(id){
+  const est = document.querySelector('input[name=estrella]:checked');
+  const nombre = $('#r-nombre').value.trim(), texto = $('#r-texto').value.trim();
+  const error = !est ? 'Elige de 1 a 5 estrellas.' :
+                nombre.length < 2 ? 'Escribe tu nombre (mínimo 2 letras).' :
+                texto.length < 5 ? 'Escribe un comentario de al menos 5 letras.' : '';
+  if(error){ $('#r-err').textContent = error; return; }
+
+  resenas.unshift({id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),  // unshift pone la última arriba
+                   juego: id, estrellas: +est.value, nombre, texto, fecha: new Date().toISOString()});
+  guardar(CLAVE_RESENAS, resenas);
+  pintarResenas(id);  // repinta la ficha
+  renderGrid();  // actualiza las estrellitas de las tarjetas
+  renderGratis(); renderComunidad();
+  toast('Gracias por tu opinión');
+}
+
+/* B2) opiniones de la tienda, puntuar y comentar juntos */
+let opinionesTienda = leer(CLAVE_OPINIONES_TIENDA, []);
+if(!Array.isArray(opinionesTienda)) opinionesTienda = [];  // por si lo guardado estuviera dañado
+
+const fechaCorta = f => new Date(f).toLocaleDateString('es-ES', {dateStyle:'medium'});  // formato "24 sept 2026"
+const nuevoId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);  // un código único para cada opinión, tema o respuesta
+
+// dibuja la sección: nota media y reparto, formulario y lista
+function renderOpinionesTienda(){
+  const cont = $('#tienda-opiniones'); if(!cont) return;
+  const n = opinionesTienda.length;
+  const media = n ? opinionesTienda.reduce((s, o) => s + o.estrellas, 0) / n : 0;  // nota media de la tienda
+  const reparto = [5, 4, 3, 2, 1].map(e => {  // cuántas opiniones tiene cada puntuación
+    const c = opinionesTienda.filter(o => o.estrellas === e).length;
+    return `<div class="d-row"><span>${e} ★</span><div class="bar"><i style="width:${n ? c / n * 100 : 0}%"></i></div><span>${c}</span></div>`;
+  }).join('');
+  const visibles = opinionesTienda.slice(0, 10);  // solo las 10 más recientes
+
+  cont.innerHTML = `
+    <div class="rev-top">
+      <div class="rev-avg"><b>${n ? fmt(media) : '–'}</b>${n ? estrellasHTML(Math.round(media)) : ''}<small>${n} ${n === 1 ? 'opinión' : 'opiniones'}</small></div>
+      <div class="dist">${reparto}</div>
+    </div>
+
+    <!-- formulario: las estrellas y el comentario se envían juntos con el botón -->
+    <div class="rev-form">
+      <b>${TEXTO_PUNTUAR}</b>
+      <div class="stars-input" role="radiogroup" aria-label="${TEXTO_PUNTUAR}">${estrellasInputHTML('estrella-tienda', 'tienda')}</div>
+      <label class="field"><span>Tu nombre</span><input id="t-nombre" maxlength="30" autocomplete="nickname"></label>
+      <label class="field"><span>Tu comentario</span><textarea id="t-texto" rows="3" maxlength="500"></textarea></label>
+      <p class="err" id="t-err" role="alert"></p>
+      <button class="btn primary" type="button" data-tienda-send>Publicar opinión</button>
+    </div>
+
+    <div>${visibles.length ? visibles.map(o => `<div class="rev">
+      <header><span>${estrellasHTML(o.estrellas)} <b>${esc(o.nombre)}</b></span><small>${fechaCorta(o.fecha)}</small></header>
+      <p>${esc(o.texto)}</p>
+      ${MODO_DEMO ? `<button class="link" type="button" data-tienda-del="${o.id}">Borrar</button>` : ''}
+    </div>`).join('') : '<p class="muted">Todavía no hay opiniones sobre la tienda. ¡Sé el primero!</p>'}</div>`;
+}
+
+// comprueba y guarda una opinión de la tienda, mismos pasos que enviarResena
+function enviarOpinionTienda(){
+  const est = document.querySelector('input[name=estrella-tienda]:checked');
+  const nombre = $('#t-nombre').value.trim(), texto = $('#t-texto').value.trim();
+  const error = !est ? 'Elige de 1 a 5 estrellas.' :
+                nombre.length < 2 ? 'Escribe tu nombre (mínimo 2 letras).' :
+                texto.length < 5 ? 'Escribe un comentario de al menos 5 letras.' : '';
+  if(error){ $('#t-err').textContent = error; return; }
+
+  opinionesTienda.unshift({id: nuevoId(), estrellas: +est.value, nombre, texto, fecha: new Date().toISOString()});  // unshift pone la última arriba
+  guardar(CLAVE_OPINIONES_TIENDA, opinionesTienda);
+  renderOpinionesTienda();  // repinta la sección y deja el formulario vacío
+  toast('Gracias por tu opinión');
+}
+
+/* B3) debate, un pequeño foro donde cualquiera abre un tema */
+let debates = leer(CLAVE_DEBATE, []);
+if(!Array.isArray(debates)) debates = [];
+debates.forEach(d => { if(!Array.isArray(d.respuestas)) d.respuestas = []; });  // cada tema debe tener su lista de respuestas
+
+// temas que están desplegados ahora mismo
+const debAbiertos = new Set();
+
+// dibuja dentro de com-debate: el formulario para abrir un tema y la lista de temas
+function renderDebate(){
+  const cont = $('#com-debate'); if(!cont) return;
+
+  const temas = debates.map(d => {
+    const nResp = d.respuestas.length;
+    return `<details class="deb" data-deb="${d.id}" ${debAbiertos.has(d.id) ? 'open' : ''}>
+      <summary>${esc(d.titulo)} <small>· ${esc(d.nombre)} · ${fechaCorta(d.fecha)} · ${nResp} ${nResp === 1 ? 'respuesta' : 'respuestas'}</small></summary>
+
+      <!-- mensaje del autor del tema -->
+      <div class="msg"><p>${esc(d.texto)}</p>${MODO_DEMO ? `<button class="link" type="button" data-deb-del="${d.id}">Borrar tema</button>` : ''}</div>
+
+      <!-- respuestas, de la más antigua a la más reciente -->
+      ${d.respuestas.map(r => `<div class="msg"><b>${esc(r.nombre)}</b> <small>${fechaCorta(r.fecha)}</small><p>${esc(r.texto)}</p>${MODO_DEMO ? `<button class="link" type="button" data-deb-rdel="${r.id}" data-deb-in="${d.id}">Borrar</button>` : ''}</div>`).join('')}
+
+      <!-- formulario para responder -->
+      <div class="reply-form">
+        <label class="field"><span>Tu nombre</span><input id="dr-nombre-${d.id}" maxlength="30" autocomplete="nickname"></label>
+        <label class="field"><span>Tu respuesta</span><textarea id="dr-texto-${d.id}" rows="2" maxlength="500"></textarea></label>
+        <p class="err" id="dr-err-${d.id}" role="alert"></p>
+        <button class="btn" type="button" data-deb-reply="${d.id}">Responder</button>
+      </div>
+    </details>`;
+  }).join('');
+
+  cont.innerHTML = `<h3>Debate</h3>
+    <p class="muted">Abre un tema para hablar con otros jugadores o responde a los que ya existen.</p>
+    <details class="deb">
+      <summary>Abrir un tema nuevo</summary>
+      <div class="new-form">
+        <label class="field"><span>Título del tema</span><input id="deb-titulo" maxlength="80"></label>
+        <label class="field"><span>Tu nombre</span><input id="deb-nombre" maxlength="30" autocomplete="nickname"></label>
+        <label class="field"><span>Tu mensaje</span><textarea id="deb-texto" rows="3" maxlength="500"></textarea></label>
+        <p class="err" id="deb-err" role="alert"></p>
+        <button class="btn primary" type="button" data-deb-send>Publicar tema</button>
+      </div>
+    </details>
+    ${temas || '<p class="muted">Aún no hay temas. ¡Abre el primero!</p>'}`;
+}
+
+// comprueba y guarda un tema
+function enviarDebate(){
+  const titulo = $('#deb-titulo').value.trim(), nombre = $('#deb-nombre').value.trim(), texto = $('#deb-texto').value.trim();
+  const error = titulo.length < 3 ? 'Escribe un título (mínimo 3 letras).' :
+                nombre.length < 2 ? 'Escribe tu nombre (mínimo 2 letras).' :
+                texto.length < 5 ? 'Escribe un mensaje de al menos 5 letras.' : '';
+  if(error){ $('#deb-err').textContent = error; return; }
+  debates.unshift({id: nuevoId(), titulo, nombre, texto, fecha: new Date().toISOString(), respuestas: []});  // el tema más reciente arriba
+  guardar(CLAVE_DEBATE, debates);
+  renderDebate();
+  toast('Tema publicado');
+}
+
+// comprueba y guarda una respuesta dentro de un tema
+function enviarRespuesta(id){
+  const d = debates.find(x => x.id === id); if(!d) return;
+  const nombre = $('#dr-nombre-' + id).value.trim(), texto = $('#dr-texto-' + id).value.trim();
+  const error = nombre.length < 2 ? 'Escribe tu nombre (mínimo 2 letras).' :
+                texto.length < 2 ? 'Escribe tu respuesta.' : '';
+  if(error){ $('#dr-err-' + id).textContent = error; return; }
+  d.respuestas.push({id: nuevoId(), nombre, texto, fecha: new Date().toISOString()});  // push pone la respuesta más reciente abajo
+  guardar(CLAVE_DEBATE, debates);
+  debAbiertos.add(id);  // que el tema siga abierto después de repintar
+  renderDebate();
+  toast('Respuesta publicada');
+}
+
+/* C) ventana de comunidad, el HTML vacío está en el dialog */
+function renderComunidad(){
+  // 1) debate: temas y respuestas entre jugadores
+  renderDebate();
+
+  // 2) Últimas opiniones de todos los juegos
+  const ultimas = resenas.slice(0, 6);  // las 6 más recientes
+  $('#com-ultimas').innerHTML = '<h3>Últimas opiniones</h3>' +
+    (ultimas.length ? ultimas.map(r => opinionHTML(r, true)).join('')
+                    : '<p class="muted">Aún no hay opiniones. Abre un juego y sé el primero en opinar.</p>');
+
+  // 3) Ranking: los 5 juegos con mejor nota media
+  const ranking = GAMES.map(g => ({g, ...resumen(g.id)})).filter(x => x.n > 0)
+                       .sort((a, b) => b.media - a.media || b.n - a.n).slice(0, 5);  // mejor nota; si empatan, más opiniones
+  $('#com-top').innerHTML = '<h3>Mejor puntuados por la comunidad</h3>' +
+    (ranking.length ? ranking.map((x, i) => `<div class="line"><span>${i + 1}. <button class="link" data-open="${x.g.id}">${x.g.title}</button></span><span><span class="stars">★</span> ${fmt(x.media)} <small>(${x.n})</small></span></div>`).join('')
+                    : '<p class="muted">El ranking aparecerá cuando haya opiniones.</p>');
+}
+
+/* D) sección juegos gratis, coge de GAMES los juegos con price:0 y los pinta igual que el resto */
+function renderGratis(){
+  const gratis = GAMES.filter(g => g.price === 0);
+  $('#grid-gratis').innerHTML = gratis.length ? gratis.map(g => cardHTML(g,
+    g.download
+      ? `<div class="row"><a class="btn primary" href="${g.download}" target="_blank" rel="noopener noreferrer">Descargar gratis</a></div>`
+      : `<div class="row"><button class="btn primary" data-add="${g.id}">Añadir a la cesta</button></div>`  // sin enlace oficial: se pide por la cesta y llega el código por correo
+  )).join('') : '<p class="empty">Ahora mismo no hay juegos gratis.</p>';
+}
+
+/* E) soporte */
+function renderSoporte(){
+  $('#contact').innerHTML = `
+    <div class="widget"><h3>Correo electrónico</h3>
+      <p class="muted">Escríbenos y te contestaremos. Si es por una compra, indica tu número de pedido (empieza por PR-).</p>
+      <a href="mailto:${SOPORTE_EMAIL}">${SOPORTE_EMAIL}</a></div>
+    <div class="widget"><h3>Teléfono</h3>
+      <p class="muted">${SOPORTE_HORARIO}</p>
+      <a href="tel:${SOPORTE_TEL_LNK}">${SOPORTE_TEL_TXT}</a></div>
+    <div class="widget"><h3>Ayuda rápida</h3>
+      <p class="muted">Respuestas a los problemas más habituales de búsqueda, compra y pago.</p>
+      <button class="btn" type="button" data-abrir-ayuda>Ver preguntas frecuentes</button></div>`;  // cierra esta ventana y abre el desplegable de la página
+}
+
+// formulario de contacto: no necesita servidor
+function enviarSoporte(){
+  const nombre = $('#s-nombre').value.trim(), mail = $('#s-mail').value.trim(), tema = $('#s-tema').value, msg = $('#s-msg').value.trim();
+  const error = nombre.length < 2 ? 'Escribe tu nombre.' :
+                !EMAIL_OK.test(mail) ? 'Escribe un correo válido para poder responderte.' :
+                msg.length < 10 ? 'Cuéntanos tu problema con un poco más de detalle.' : '';
+  $('#s-err').textContent = error;
+  if(error) return;
+  const cuerpo = `${msg}\n\n---\nNombre: ${nombre}\nCorreo: ${mail}`;
+  location.href = `mailto:${SOPORTE_EMAIL}?subject=${encodeURIComponent('[' + tema + '] ' + nombre)}&body=${encodeURIComponent(cuerpo)}`;  // encodeURIComponent convierte espacios y tildes a un formato válido para el enlace
+}
+
+/* F) clics y arranque */
+document.addEventListener('click', e => {
+  const send = e.target.closest('[data-rev-send]');
+  if(send){ enviarResena(send.dataset.revSend); return; }  // botón "Publicar opinión"
+
+  const del = e.target.closest('[data-rev-del]');  // botón Borrar, solo en la demo
+  if(del && confirm('¿Borrar esta opinión?')){
+    const id = resenas.find(r => r.id === del.dataset.revDel)?.juego;  // juego al que pertenecía la opinión
+    resenas = resenas.filter(r => r.id !== del.dataset.revDel);
+    guardar(CLAVE_RESENAS, resenas);
+    if(id) pintarResenas(id);
+    renderGrid(); renderGratis(); renderComunidad();
+    return;
+  }
+
+  // opiniones sobre la tienda
+  if(e.target.closest('[data-tienda-send]')){ enviarOpinionTienda(); return; }  // botón "Publicar opinión" de la tienda
+  const tDel = e.target.closest('[data-tienda-del]');  // botón Borrar, solo en la demo
+  if(tDel && confirm('¿Borrar esta opinión?')){
+    opinionesTienda = opinionesTienda.filter(o => o.id !== tDel.dataset.tiendaDel);
+    guardar(CLAVE_OPINIONES_TIENDA, opinionesTienda);
+    renderOpinionesTienda();
+    return;
+  }
+
+  // debate de la ventana Comunidad
+  if(e.target.closest('[data-deb-send]')){ enviarDebate(); return; }  // botón "Publicar tema"
+  const dRep = e.target.closest('[data-deb-reply]');  // botón Responder, lleva el id del tema
+  if(dRep){ enviarRespuesta(dRep.dataset.debReply); return; }
+  const dDel = e.target.closest('[data-deb-del]');  // Borrar tema, solo en la demo
+  if(dDel && confirm('¿Borrar este tema y todas sus respuestas?')){
+    debates = debates.filter(d => d.id !== dDel.dataset.debDel);
+    guardar(CLAVE_DEBATE, debates);
+    renderDebate();
+    return;
+  }
+  const rDel = e.target.closest('[data-deb-rdel]');  // Borrar una respuesta, solo en la demo
+  if(rDel && confirm('¿Borrar esta respuesta?')){
+    const tema = debates.find(d => d.id === rDel.dataset.debIn);  // data-deb-in tema al que pertenece
+    if(tema) tema.respuestas = tema.respuestas.filter(r => r.id !== rDel.dataset.debRdel);
+    guardar(CLAVE_DEBATE, debates);
+    debAbiertos.add(rDel.dataset.debIn);  // el tema sigue abierto
+    renderDebate();
+    return;
+  }
+
+  if(e.target.closest('[data-soporte-send]')){ enviarSoporte(); return; }  // botón "Enviar por correo"
+
+  // ventanas emergentes y ayuda desplegable, funciones en el apartado G
+  const win = e.target.closest('[data-win]');
+  if(win){ abrirVentana(win.dataset.win); return; }  // botones del menú: Comunidad / Soporte
+  const cerrar = e.target.closest('[data-win-close]');
+  if(cerrar){ cerrar.closest('dialog').close(); return; }  // botón "Cerrar" de esas ventanas
+  if(e.target.closest('[data-ayuda-toggle]')){ abrirAyuda($('#faq').hidden); return; }  // pulsar la barra: si estaba oculta se abre y si no se cierra
+  if(e.target.closest('[data-ayuda-ir]')){ abrirAyuda(true, true); return; }  // "Ayuda" del menú: abre y baja
+  if(e.target.closest('[data-abrir-ayuda]')){  // botón dentro de la ventana de Soporte
+    $('#soporte-win').close(); abrirAyuda(true, true); return;
+  }
+});
+
+
+// cada vez que se abre o cierra un tema del debate se apunta en debAbiertos
+document.addEventListener('toggle', e => {
+  const id = e.target.dataset && e.target.dataset.deb;  // solo los details de los temas
+  if(!id) return;
+  if(e.target.open) debAbiertos.add(id); else debAbiertos.delete(id);
+}, true);
+
+/* G) ventanas emergentes y ayuda desplegable */
+
+// abre la ventana catalogo, comunidad o soporte
+function abrirVentana(nombre){
+  const d = $('#' + nombre + '-win');
+  if(!d || d.open) return;  // si no existe o ya está abierta, no hacemos nada
+  if(nombre === 'comunidad') renderComunidad();  // la repintamos para que salga actualizada
+  if(nombre === 'catalogo') prepararCatalogo();  // repinta el catálogo antes de abrirlo
+  d.showModal();
+}
+
+// abre o cierra el desplegable de preguntas frecuentes de la página principal
+function abrirAyuda(abrir, bajar = false){
+  $('#faq').hidden = !abrir;  // hidden significa oculto
+  $('#faq-btn').setAttribute('aria-expanded', String(abrir));  // hace girar la flecha y avisa a los lectores de pantalla
+  if(bajar) $('#ayuda').scrollIntoView();
+}
+
+// arranque: pinta las secciones y repinta el catálogo
+renderSoporte(); renderGratis(); renderComunidad(); renderOpinionesTienda(); renderGrid();
+</script>
+<!-- cuarto script: barra horizontal de destacados -->
+<script>
+/* A) ajustes */
+const DESTACADOS_CANTIDAD = 7;  // cuántos juegos salen en la barra
+const DESTACADOS_MANUAL   = [];  // ids de juegos para forzar cuáles salen y en qué orden
+                                    // si está vacío salen los mejor valorados, campo rating de GAMES
+const ROTACION_MS         = 5000;  // cada cuánto cambia de juego, 5000 ms son 5 segundos
+const TRAILER_RETRASO_MS  = 400;  // cuánto tiene que quedarse quieto el ratón para que arranque el tráiler, 400 ms
+// si el sistema pide menos movimiento la barra no rota sola
+const SIN_MOVIMIENTO = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* rotación de la franja de arriba */
+const HERO_ROTACION_MS = 5000;  // cada cuánto cambia el juego de la franja de arriba, 5000 ms
+let heroIndice  = 0;  // qué juego de GAMES se está mostrando ahora arriba
+let heroPausado = false;  // true mientras el ratón está encima de la franja
+let heroTimer   = null;  // el temporizador de esta rotación
+
+/* B) estado, variables que cambian mientras la barra funciona */
+let destacados = [];  // los juegos elegidos, en orden
+let destActivo = 0;  // posición del juego activo, 0 es el primero
+let destTrailer = -1;  // posición del juego cuyo tráiler está sonando, -1 si ninguno
+let destPendiente = -1;  // posición del juego cuyo tráiler está "a punto de arrancar"
+let destRetraso = null;  // el temporizador de esa espera
+let destPausado = false;  // true mientras el ratón está sobre la barra
+let destTimer = null;  // el temporizador de la rotación
+
+/* C) elegir y pintar los juegos */
+function elegirDestacados(){
+  // 1) si hay ids en DESTACADOS_MANUAL se usan esos, ignorando los que no existan
+  const manual = DESTACADOS_MANUAL.map(id => GAMES.find(g => g.id === id)).filter(Boolean);
+  if(manual.length) return manual.slice(0, DESTACADOS_CANTIDAD);
+  return GAMES.filter(g => g.price > 0).sort((a, b) => b.rating - a.rating).slice(0, DESTACADOS_CANTIDAD);
+}
+
+// la fila horizontal: un <li> por juego
+function renderDestacados(){
+  destacados = elegirDestacados();
+  $('#dest-list').innerHTML = destacados.map((g, i) => `
+    <li class="dest-item ${i === 0 ? 'is-active' : ''}" data-dest="${i}">
+      <button class="dest-head" type="button" data-open="${g.id}">
+        <span class="dest-pos">${i + 1}</span>
+        <span class="dest-thumb" style="--h:${g.hue}">${g.img ? `<img src="${g.img}" alt="">` : ''}</span>
+        <span class="dest-title">${g.title}</span>
+        <span class="dest-rate">${g.rating}%</span>
+      </button>
+    </li>`).join('');
+  pintarPanelDest(0);
+}
+
+// el panel de debajo: imagen a la izquierda y los datos del juego a la derecha
+function pintarPanelDest(i){
+  const g = destacados[i];
+  $('#dest-panel').innerHTML = `<div class="dest-panel">
+    <div class="dest-stage">${coverHTML(g)}</div>
+    <div class="dest-info">
+      <h3>${g.title}</h3>
+      ${tagsHTML(g)}
+      <p class="dest-desc">${g.short}</p>
+      <p class="mini-rating">${g.rating}% de reseñas positivas · ${anioJuego(g)}</p>
+      <div class="prices">${priceHTML(g)}</div>
+      <div class="row">
+        <button class="btn primary" type="button" data-open="${g.id}">Ver detalles</button>
+        <button class="btn" type="button" data-add="${g.id}">Añadir al carrito</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* D) cambiar de juego y poner o quitar su tráiler */
+
+// hace activo el juego nº i: marca su casilla de la fila y escribe su panel
+function activarDest(i){
+  quitarTrailerDest();
+  document.querySelectorAll('.dest-item').forEach((el, n) => {
+    el.classList.toggle('is-active', n === i);  // toggle pone o quita la clase
+    if(n === i) el.setAttribute('aria-current', 'true'); else el.removeAttribute('aria-current');  // avisa a lectores de pantalla
+  });
+  pintarPanelDest(i);
+  destActivo = i;
+}
+
+// pone el tráiler encima de la imagen del juego nº i
+function ponerTrailerDest(i){
+  const g = destacados[i];
+  if(!g || !g.trailer) return;
+  quitarTrailerDest();
+  const stage = document.querySelector('#dest-panel .dest-stage');
+  if(!stage) return;
+  const esVideo = /\.(mp4|webm)$/i.test(g.trailer);  // ¿es un archivo .mp4/.webm o una ID de YouTube?
+  stage.insertAdjacentHTML('beforeend', esVideo
+    ? `<video class="dest-trailer" src="${g.trailer}" autoplay muted loop playsinline></video>`
+    : `<iframe class="dest-trailer" src="https://www.youtube-nocookie.com/embed/${g.trailer}?autoplay=1&mute=1&controls=0&loop=1&playlist=${g.trailer}&rel=0&playsinline=1" title="Tráiler de ${g.title}" allow="autoplay"></iframe>`);
+  destTrailer = i;
+  const v = stage.querySelector('video');
+  if(v) v.play().catch(() => {});  // refuerzo por si el navegador no arranca solo
+}
+
+// apaga el tráiler: borrar el <video> del HTML lo detiene y deja de descargarlo
+function quitarTrailerDest(){
+  clearTimeout(destRetraso);
+  destPendiente = -1;
+  document.querySelectorAll('.dest-trailer').forEach(el => el.remove());
+  destTrailer = -1;
+}
+
+/* E) rotación automática */
+// pasa al siguiente juego
+function siguienteDest(){
+  if(destPausado || document.hidden || document.querySelector('dialog[open]')) return;
+  activarDest((destActivo + 1) % destacados.length);  // el % hace que después del último vuelva al primero
+}
+
+// arranca el reloj de la rotación
+function arrancarRotacion(){
+  clearInterval(destTimer);
+  if(SIN_MOVIMIENTO || destacados.length < 2) return;
+  destTimer = setInterval(siguienteDest, ROTACION_MS);
+}
+
+/* F) el ratón y el teclado sobre la barra */
+const barraDest = $('#dest-bar');
+
+// entra el ratón o el foco del teclado en la barra
+function entraEnDest(e){
+  const item = e.target.closest('.dest-item');
+  const i = item ? +item.dataset.dest : destActivo;  // el + convierte el texto "3" en el número 3
+  destPausado = true;  // 1) rotación detenida
+  barraDest.classList.add('is-paused');  // el borde de la barra cambia de color
+  if(i !== destActivo) activarDest(i);  // 2) el juego bajo el ratón pasa a ser el activo
+  if(destTrailer !== i && destPendiente !== i){  // 3) si el ratón se queda quieto, arranca su tráiler
+    destPendiente = i;
+    destRetraso = setTimeout(() => { destPendiente = -1; ponerTrailerDest(i); }, TRAILER_RETRASO_MS);
+  }
+}
+
+// sale el ratón de la barra: se apaga el tráiler y la rotación continúa
+function saleDeDest(){
+  destPausado = false;
+  barraDest.classList.remove('is-paused');
+  quitarTrailerDest();
+  arrancarRotacion();
+}
+
+barraDest.addEventListener('mouseover', entraEnDest);  // "mouseover" sube por los elementos, así que vale para toda la barra
+barraDest.addEventListener('focusin', entraEnDest);  // lo mismo con el teclado
+barraDest.addEventListener('mouseleave', saleDeDest);
+barraDest.addEventListener('focusout', e => { if(!barraDest.contains(e.relatedTarget)) saleDeDest(); });
+
+// al pulsar un juego se abre su ficha y aquí se apaga el tráiler
+barraDest.addEventListener('click', e => { if(e.target.closest('[data-open]')) quitarTrailerDest(); });
+
+// cuando se cierra la ficha del juego, la barra vuelve a su ritmo normal
+document.addEventListener('close', e => { if(e.target.id === 'detail') saleDeDest(); }, true);  // el true es porque el evento "close" no sube solo
+
+// en pantallas táctiles no hay salir del ratón: si se toca fuera de la barra se da por salido
+document.addEventListener('pointerdown', e => { if(destPausado && !barraDest.contains(e.target)) saleDeDest(); });
+
+/* H) rotación de la franja de arriba */
+
+// pasa la franja de arriba al siguiente juego de la lista GAMES
+function siguienteHero(){
+  if(heroPausado || document.hidden || document.querySelector('dialog[open]')) return;
+  let vueltas = 0;
+  do { heroIndice = (heroIndice + 1) % GAMES.length; vueltas++; } while(GAMES[heroIndice].price === 0 && vueltas < GAMES.length);
+  renderHero(heroIndice);
+}
+
+// arranca el reloj de esta rotación
+function arrancarRotacionHero(){
+  clearInterval(heroTimer);
+  if(SIN_MOVIMIENTO || GAMES.length < 2) return;
+  heroTimer = setInterval(siguienteHero, HERO_ROTACION_MS);
+}
+
+// el ratón encima de la franja pausa la rotación y al salir sigue
+const franjaHero = $('#hero');
+franjaHero.addEventListener('mouseenter', () => { heroPausado = true; });
+franjaHero.addEventListener('mouseleave', () => { heroPausado = false; });
+
+/* G) arranque */
+renderDestacados();
+arrancarRotacion();
+arrancarRotacionHero();  // arranca también la rotación de la franja de arriba
+</script>
+
+<!-- quinto script, mejoras frente a Steam -->
+<style>
+/* estilos */
+.cats{display:grid;gap:8px;margin:0 0 18px;padding:14px;border:1px solid var(--line);border-radius:var(--radius)}
+.cats .d-row{display:grid;grid-template-columns:120px 1fr 36px;gap:10px;align-items:center}
+.cats small{color:var(--muted)}
+.cats-form{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.cats-form b{flex:1 0 100%}
+.cats-form select,.dw-fila select,.dw-ficha select{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:4px 8px}
+.rev-cats{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.rev-cats span{font-size:.8rem;padding:2px 10px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
+.dw-ficha{display:grid;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.dw-ficha small{color:var(--muted)}
+.dw-fila{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.dw-fila .link{font-weight:700}
+.dw-fila .btn{height:34px;padding:0 12px}
+.dw-nueva{display:flex;gap:8px;margin-top:14px}
+.dw-nueva input{flex:1;height:40px;padding:0 12px;border-radius:var(--radius);background:var(--bg);border:1px solid var(--line);color:var(--text)}
+</style>
+<script>
+/* A) reseñas por categorías, cada opinión puede llevar un objeto cats */
+const CATEGORIAS = [['jugabilidad', 'Jugabilidad'], ['graficos', 'Gráficos'], ['rendimiento', 'Rendimiento'], ['precio', 'Calidad-precio']];  // añade o quita categorías aquí
+
+const pintarResenasOriginal = pintarResenas;
+pintarResenas = function(id){
+  pintarResenasOriginal(id);  // 1) se pinta todo igual que la función original
+  const cont = $('#resenas'); if(!cont) return;
+  // 2) barras con la media de cada categoría, solo cuentan las opiniones que puntuaron
+  const conCats = resenas.filter(r => r.juego === id && r.cats);
+  const barras = CATEGORIAS.map(([k, nombre]) => {
+    const v = conCats.map(r => r.cats[k]).filter(Number);
+    const media = v.length ? v.reduce((a, b) => a + b, 0) / v.length : 0;
+    return `<div class="d-row"><span>${nombre}</span><div class="bar"><i style="width:${media / 5 * 100}%"></i></div><span>${v.length ? fmt(media) : '–'}</span></div>`;
+  }).join('');
+  const top = cont.querySelector('.rev-top');
+  if(top) top.insertAdjacentHTML('afterend', `<div class="cats"><b>Nota por categorías</b>${barras}<small>${conCats.length ? `Según ${conCats.length} ${conCats.length === 1 ? 'opinión' : 'opiniones'}.` : 'Aún nadie ha puntuado categorías.'}</small></div>`);
+  // 3) en el formulario un desplegable por categoría, opcional
+  const err = $('#r-err');
+  if(err) err.insertAdjacentHTML('beforebegin', `<div class="cats-form"><b>Puntúa por categorías (opcional)</b>${CATEGORIAS.map(([k, n]) =>
+    `<label>${n} <select data-cat="${k}"><option value="">–</option>${[1, 2, 3, 4, 5].map(e => `<option>${e}</option>`).join('')}</select></label>`).join('')}</div>`);
+};
+
+const enviarResenaOriginal = enviarResena;
+enviarResena = function(id){
+  const cats = {};
+  document.querySelectorAll('select[data-cat]').forEach(s => { if(s.value) cats[s.dataset.cat] = +s.value; });
+  const antes = resenas.length;
+  enviarResenaOriginal(id);
+  if(resenas.length > antes && Object.keys(cats).length){  // solo si la opinión se publicó de verdad
+    resenas[0].cats = cats;  // la última opinión va siempre la primera
+    guardar(CLAVE_RESENAS, resenas);
+    pintarResenas(id);
+  }
+};
+
+// en cada opinión, pequeñas etiquetas con sus notas
+const opinionHTMLOriginal = opinionHTML;
+opinionHTML = function(r, conJuego){
+  const h = opinionHTMLOriginal(r, conJuego);
+  if(!r.cats) return h;
+  const chips = CATEGORIAS.filter(([k]) => r.cats[k]).map(([k, n]) => `<span>${n} ${r.cats[k]}/5</span>`).join('');
+  return h.replace('<p>', `<div class="rev-cats">${chips}</div><p>`);
+};
+
+/* B) varias listas de deseos */
+const CLAVE_DESEOS = 'prisma_deseos';
+let deseos = leer(CLAVE_DESEOS, null);
+if(!deseos || !Array.isArray(deseos.listas) || !deseos.listas.length){  // primera vez: 3 listas de ejemplo, se pueden cambiar
+  deseos = {listas: [
+    {id: 'ya',         nombre: 'Comprar ya',     juegos: [], avisos: false},
+    {id: 'rebaja',     nombre: 'Esperar rebaja', juegos: [], avisos: true},
+    {id: 'curiosidad', nombre: 'Curiosidad',     juegos: [], avisos: false}
+  ]};
+}
+deseos.listas.forEach(l => { l.juegos = (l.juegos || []).filter(gid => juego(gid)); });  // se ignoran juegos que ya no existen
+let listaActiva = deseos.listas[0].id;
+const guardarDeseos = () => guardar(CLAVE_DESEOS, deseos);
+const listaPor = id => deseos.listas.find(l => l.id === id);
+const totalDeseos = () => new Set(deseos.listas.flatMap(l => l.juegos)).size;
+
+// botón en la cabecera junto al carrito y ventana de deseos
+$('#cart').insertAdjacentHTML('beforebegin', '<button class="cart" id="deseos-btn" type="button" style="margin-left:auto">♡ Deseos <b id="deseos-n">0</b></button>');
+$('#cart').style.marginLeft = '8px';
+document.body.insertAdjacentHTML('beforeend', '<dialog id="deseos-win" class="panel wide" aria-labelledby="deseos-titulo"><div id="deseos-wrap"></div></dialog>');
+
+// dibuja la ventana: pestañas con las listas, juegos de la lista activa y formulario para crear
+function pintarDeseos(){
+  $('#deseos-n').textContent = totalDeseos();
+  const l = listaPor(listaActiva) || deseos.listas[0];
+  listaActiva = l.id;
+  const otras = deseos.listas.filter(x => x.id !== l.id).map(x => `<option value="${esc(x.id)}">${esc(x.nombre)}</option>`).join('');
+  const filas = l.juegos.map(gid => {
+    const g = juego(gid);
+    const enOferta = g.discount > 0 && g.price > 0;
+    return `<div class="dw-fila">
+      <button class="link" type="button" data-open="${g.id}">${esc(g.title)}</button>
+      <span class="prices">${priceHTML(g)}</span>
+      ${enOferta ? '<b style="color:var(--lime)">¡En oferta!</b>' : ''}
+      ${otras ? `<select data-dw-mover="${g.id}" aria-label="Mover a otra lista"><option value="">Mover a…</option>${otras}</select>` : ''}
+      <button class="btn" type="button" data-add="${g.id}">Añadir al carrito</button>
+      <button class="link" type="button" data-dw-quitar="${g.id}">Quitar</button>
+    </div>`;
+  }).join('') || '<p class="intro">Esta lista está vacía. Abre la ficha de un juego y pulsa "Guardar en la lista".</p>';
+  $('#deseos-wrap').innerHTML = `
+    <div class="head"><h2 id="deseos-titulo">Mis listas de deseos</h2><button class="btn" type="button" data-dw-cerrar>Cerrar</button></div>
+    <div class="chips" role="group" aria-label="Listas">${deseos.listas.map(x =>
+      `<button type="button" data-dw-lista="${esc(x.id)}" aria-pressed="${x.id === l.id}">${esc(x.nombre)} (${x.juegos.length})</button>`).join('')}</div>
+    <label style="display:flex;gap:8px;align-items:center;margin:14px 0"><input type="checkbox" data-dw-avisos ${l.avisos ? 'checked' : ''}> Avisarme cuando un juego de esta lista esté en oferta</label>
+    ${filas}
+    <div class="dw-nueva"><input id="dw-nuevo" maxlength="30" placeholder="Nombre de una lista nueva" aria-label="Nombre de la lista nueva"><button class="btn primary" type="button" data-dw-crear>Crear lista</button></div>
+    ${deseos.listas.length > 1 ? '<p style="margin-top:12px"><button class="link" type="button" data-dw-borrar>Borrar esta lista</button></p>' : ''}`;
+}
+
+// en la ficha de un juego: selector de lista + botón
+function pintarFichaDeseos(id){
+  const fila = document.querySelector('#d-wrap .d-side .row'); if(!fila) return;
+  document.querySelectorAll('#d-wrap .dw-ficha').forEach(e => e.remove());
+  const en = deseos.listas.filter(l => l.juegos.includes(id)).map(l => esc(l.nombre));
+  fila.insertAdjacentHTML('afterend', `<div class="dw-ficha">
+    <label class="field"><span>♡ Lista de deseos</span><select id="dw-sel">${deseos.listas.map(l => `<option value="${esc(l.id)}">${esc(l.nombre)}</option>`).join('')}</select></label>
+    <button class="btn" type="button" data-dw-add="${id}">Guardar en la lista</button>
+    ${en.length ? `<small>Ya está en: ${en.join(', ')}</small>` : ''}</div>`);
+}
+const openDetailOriginal = openDetail;
+openDetail = function(id){ openDetailOriginal(id); pintarFichaDeseos(id); };  // ficha como siempre más el bloque de deseos
+
+// clics y cambios de la lista de deseos, un solo oyente
+document.addEventListener('click', e => {
+  if(e.target.closest('#deseos-btn')){ pintarDeseos(); $('#deseos-win').showModal(); return; }
+  if(e.target.closest('[data-dw-cerrar]')){ $('#deseos-win').close(); return; }
+  const add = e.target.closest('[data-dw-add]');
+  if(add){
+    const l = listaPor($('#dw-sel').value), gid = add.dataset.dwAdd;
+    if(!l.juegos.includes(gid)) l.juegos.push(gid);
+    guardarDeseos(); pintarFichaDeseos(gid); $('#deseos-n').textContent = totalDeseos();
+    toast(`Guardado en "${l.nombre}"`); return;
+  }
+  const ls = e.target.closest('[data-dw-lista]');
+  if(ls){ listaActiva = ls.dataset.dwLista; pintarDeseos(); return; }
+  const q = e.target.closest('[data-dw-quitar]');
+  if(q){ const l = listaPor(listaActiva); l.juegos = l.juegos.filter(x => x !== q.dataset.dwQuitar); guardarDeseos(); pintarDeseos(); return; }
+  if(e.target.closest('[data-dw-crear]')){
+    const nombre = $('#dw-nuevo').value.trim();
+    if(nombre.length < 2){ toast('Escribe un nombre de al menos 2 letras'); return; }
+    const nueva = {id: 'l' + Date.now().toString(36), nombre, juegos: [], avisos: false};
+    deseos.listas.push(nueva); listaActiva = nueva.id; guardarDeseos(); pintarDeseos(); return;
+  }
+  if(e.target.closest('[data-dw-borrar]')){
+    const l = listaPor(listaActiva);
+    if(l.juegos.length && !confirm(`"${l.nombre}" tiene ${l.juegos.length} juego(s). ¿Borrar la lista?`)) return;
+    deseos.listas = deseos.listas.filter(x => x.id !== l.id); listaActiva = deseos.listas[0].id; guardarDeseos(); pintarDeseos();
+  }
+});
+document.addEventListener('change', e => {
+  const mv = e.target.closest('[data-dw-mover]');
+  if(mv && mv.value){
+    const gid = mv.dataset.dwMover, desde = listaPor(listaActiva), hacia = listaPor(mv.value);
+    desde.juegos = desde.juegos.filter(x => x !== gid);
+    if(!hacia.juegos.includes(gid)) hacia.juegos.push(gid);
+    guardarDeseos(); pintarDeseos(); return;
+  }
+  if(e.target.matches('[data-dw-avisos]')){ listaPor(listaActiva).avisos = e.target.checked; guardarDeseos(); }
+});
+
+// aviso de ofertas: al cargar, si un juego de una lista con avisos tiene descuento sale un aviso
+function avisarOfertas(){
+  const t = new Set();
+  deseos.listas.filter(l => l.avisos).forEach(l => l.juegos.forEach(gid => { const g = juego(gid); if(g.discount > 0 && g.price > 0) t.add(g.title); }));
+  if(t.size) toast('En oferta de tus deseos: ' + [...t].slice(0, 2).join(', ') + (t.size > 2 ? '…' : ''));
+}
+$('#deseos-n').textContent = totalDeseos();
+setTimeout(avisarOfertas, 1200);
+</script>
+
+<!-- sexto script, tráiler al parar el ratón sobre un juego -->
+<style>
+/* el tráiler de la vista previa se coloca encima de la portada */
+.prev-trailer{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:cover;pointer-events:none;z-index:1;background:#000}
+</style>
+<script>
+const PREVIEW_RETRASO_MS = TRAILER_RETRASO_MS;  // cuánto tiene que estar quieto el ratón, se reutiliza el ajuste de la barra de destacados
+const PREVIEW_ZONAS = '.card .cover, #hero .cover, .widget .cover';  // dónde funciona: tarjetas, franja de arriba y widgets
+let previewCover = null;  // portada que tiene ahora un tráiler encendido
+let previewTimer = null;  // temporizador de espera
+
+function quitarPreview(){
+  clearTimeout(previewTimer);
+  if(previewCover){ previewCover.querySelectorAll('.prev-trailer').forEach(e => e.remove()); previewCover = null; }
+}
+
+function ponerPreview(cover){
+  const g = juego(cover.dataset.open);
+  // si hay una ventana abierta solo seguimos si la portada está dentro de ella
+  const abierta = document.querySelector('dialog[open]');
+  if(!g || !g.trailer || (abierta && !abierta.contains(cover))) return;
+  quitarPreview();
+  cover.insertAdjacentHTML('beforeend', /\.(mp4|webm)$/i.test(g.trailer)
+    ? `<video class="prev-trailer" src="${g.trailer}" autoplay muted loop playsinline></video>`
+    : `<iframe class="prev-trailer" src="https://www.youtube-nocookie.com/embed/${g.trailer}?autoplay=1&mute=1&controls=0&loop=1&playlist=${g.trailer}&rel=0&playsinline=1" title="Vista previa de ${esc(g.title)}" allow="autoplay"></iframe>`);
+  previewCover = cover;
+  const v = cover.querySelector('video.prev-trailer'); if(v) v.play().catch(() => {});  // refuerzo por si el navegador no arranca solo
+}
+
+// "mousemove" salta cada vez que se mueve el ratón, cada movimiento reinicia la espera
+document.addEventListener('mousemove', e => {
+  const cover = e.target.closest ? e.target.closest(PREVIEW_ZONAS) : null;
+  if(cover && cover === previewCover) return;  // ya está sonando aquí: no reiniciamos nada
+  clearTimeout(previewTimer);
+  if(previewCover && cover !== previewCover) quitarPreview();  // el ratón se fue a otra portada
+  if(cover && cover.dataset.open) previewTimer = setTimeout(() => ponerPreview(cover), PREVIEW_RETRASO_MS);
+});
+document.addEventListener('mouseleave', quitarPreview);  // el ratón sale de la página
+document.addEventListener('click', quitarPreview, true);  // al hacer clic se apaga la vista previa, el true hace que se ejecute antes que los demás
+</script>
+
+
+<script>
+/* conexion con el servidor, base de datos Oracle */
+const API = '';   // vacio = el mismo servidor que sirve la pagina
+const CLAVES_BD = [CLAVE_RESENAS, CLAVE_PEDIDOS, CLAVE_OPINIONES_TIENDA, CLAVE_DEBATE, CLAVE_DESEOS, CLAVE_CARRITO, CLAVE_EMAIL];
+
+// identificador de invitado hasta que haya login
+function invitado(){
+  let g = localStorage.getItem('prisma_invitado');
+  if(!g){ g = crypto.randomUUID().replace(/-/g, '').slice(0, 24); localStorage.setItem('prisma_invitado', g); }
+  return g;
+}
+function cabeceras(){
+  const h = {'Content-Type': 'application/json', 'X-Invitado': invitado()};
+  const t = localStorage.getItem('prisma_token');
+  if(t) h.Authorization = 'Bearer ' + t;
+  return h;
+}
+const enviarAlServidor = (clave, valor) =>
+  fetch(`${API}/api/estado/${clave}`, {method: 'PUT', headers: cabeceras(), body: JSON.stringify({valor})}).catch(() => {});
+
+// cada vez que se guarda algo, ademas de localStorage se manda a la base de datos
+const guardarLocal = guardar;
+guardar = function(clave, valor){
+  guardarLocal(clave, valor);
+  if(CLAVES_BD.includes(clave)) enviarAlServidor(clave, valor);
+};
+
+// al abrir la pagina: traer los datos del servidor. Si el servidor esta vacio se sube lo que hay en este navegador
+(async () => {
+  try {
+    const r = await fetch(`${API}/api/estado`, {headers: cabeceras()});
+    if(!r.ok) return;
+    const e = await r.json();
+    let cambio = false;
+    for(const k of CLAVES_BD){
+      const local = localStorage.getItem(k);
+      const vacio = e[k] === undefined || (Array.isArray(e[k]) && !e[k].length);
+      if(vacio){ if(local) enviarAlServidor(k, JSON.parse(local)); continue; }
+      const nuevo = JSON.stringify(e[k]);
+      if(local !== nuevo){ localStorage.setItem(k, nuevo); cambio = true; }
+    }
+    if(cambio && !sessionStorage.getItem('bd_recargada')){ sessionStorage.setItem('bd_recargada', '1'); location.reload(); }
+  } catch(err){ /* sin servidor la tienda sigue con localStorage */ }
+})();
+</script>
+</body>
+</html>
